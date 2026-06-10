@@ -14,3 +14,4 @@ Route::get('/interrupt', function () {
 
 Route::get('/api/interrupt', [InterruptController::class, 'index']);
 Route::post('/api/entries', [InterruptController::class, 'store']);
+Route::post('/api/transcribe-chunk', \App\Http\Controllers\TranscriptionController::class);
