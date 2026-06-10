@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Prompt;
-use App\Models\Entry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,8 +12,8 @@ class InterruptTest extends TestCase
 
     public function test_can_fetch_a_random_interrupt_prompt()
     {
-        Prompt::query()->create(['ritual' => 'interrupt', 'body' => 'Test Prompt 1']);
-        Prompt::query()->create(['ritual' => 'interrupt', 'body' => 'Test Prompt 2']);
+        Prompt::create(['ritual' => 'interrupt', 'body' => 'Test Prompt 1']);
+        Prompt::create(['ritual' => 'interrupt', 'body' => 'Test Prompt 2']);
 
         $response = $this->getJson('/api/interrupt');
 
