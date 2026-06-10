@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
+import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 
 const prompt = ref({ id: null, body: 'Loading...' });
 const entry = ref('');
@@ -8,7 +9,7 @@ const isRecording = ref(false);
 
 onMounted(async () => {
     // Fetch initial random prompt
-    const response = await fetch('/api/interrupt');
+    const response = await fetch(InterruptController.index().url);
     prompt.value = await response.json();
 });
 
@@ -21,7 +22,7 @@ const sendEntry = async () => {
     if (!entry.value.trim()) return;
 
     try {
-        const response = await fetch('/api/entries', {
+        const response = await fetch(InterruptController.store().url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ const sendEntry = async () => {
         if (response.ok) {
             entry.value = '';
             // Fetch the next random prompt to keep the ritual going
-            const nextResponse = await fetch('/api/interrupt');
+            const nextResponse = await fetch(InterruptController.index().url);
             prompt.value = await nextResponse.json();
         }
     } catch (error) {
