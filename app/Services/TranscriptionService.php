@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Laravel\Ai\Transcription;
 
 class TranscriptionService
@@ -12,7 +13,14 @@ class TranscriptionService
      */
     public function transcribe(UploadedFile|string $audio): string
     {
-        // note: remember to handle exception for this line
-        return (string) Transcription::of($audio)->generate();
+        try {
+            return (string) Transcription::of($audio)->generate();
+        } catch (\Exception $e) {
+            Log::error('Transcription failed', [
+                'error' => $e->getMessage(),
+                'file' => $audio instanceof UploadedFile ? $audio->getClientOriginalName() : 'string',
+            ]);
+            return '';
+        }
     }
 }

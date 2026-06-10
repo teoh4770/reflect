@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\TranscriptionChunkProcessed;
 use App\Services\TranscriptionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TranscriptionController extends Controller
 {
@@ -19,7 +20,9 @@ class TranscriptionController extends Controller
             'session_id' => 'required|string',
         ]);
 
-        $text = $this->transcriptionService->transcribe($request->file('audio'));
+        $audio = $request->file('audio');
+
+        $text = $this->transcriptionService->transcribe($audio);
 
         broadcast(new TranscriptionChunkProcessed($text, $request->session_id));
 
