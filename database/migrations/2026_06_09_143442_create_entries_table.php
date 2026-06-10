@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('prompt_id')->constrained()->cascadeOnDelete();
             $table->text('body');
+            $table->json('metadata')->nullable();
             $table->timestamps();
         });
     }
