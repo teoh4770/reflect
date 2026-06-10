@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Prompt;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PromptSeeder extends Seeder
@@ -13,19 +12,26 @@ class PromptSeeder extends Seeder
      */
     public function run(): void
     {
+        // Clear existing prompts to ensure a clean state
+        Prompt::query()->where('ritual', 'interrupt')->delete();
+
         $prompts = [
-            ['ritual' => 'interrupt', 'body' => 'What are you avoiding right now that you know would move the needle?'],
-            ['ritual' => 'interrupt', 'body' => 'Is your current activity a distraction or a priority? Be honest.'],
-            ['ritual' => 'interrupt', 'body' => 'If you died tonight, would you be proud of how you spent this last hour?'],
-            ['ritual' => 'interrupt', 'body' => 'What "forbidden action" are you justifying to yourself at this moment?'],
-            ['ritual' => 'interrupt', 'body' => 'Who are you trying to impress with your current "busyness"?'],
-            ['ritual' => 'interrupt', 'body' => 'Stop. Look around. What in your environment is tolerating mediocrity?'],
-            ['ritual' => 'interrupt', 'body' => 'If your future self saw you right now, would they be disgusted or inspired?'],
-            ['ritual' => 'interrupt', 'body' => 'What is the most uncomfortable truth you are currently ignoring?'],
+            'What am I avoiding right now by doing what I’m doing?',
+            'If someone filmed the last two hours, what would they conclude I want from my life?',
+            'Am I moving toward the life I hate or the life I want?',
+            'What’s the most important thing I’m pretending isn’t important?',
+            'What did I do today out of identity protection rather than genuine desire?',
+            'When did I feel most alive today? When did I feel most dead?',
+            'What would change if I stopped needing people to see me as the identity I protect?',
+            'Where in my life am I trading aliveness for safety?',
+            'What’s the smallest version of the person I want to become that I could be tomorrow?',
         ];
 
-        foreach ($prompts as $prompt) {
-            Prompt::query()->create($prompt);
+        foreach ($prompts as $body) {
+            Prompt::query()->create([
+                'ritual' => 'interrupt',
+                'body' => $body,
+            ]);
         }
     }
 }
