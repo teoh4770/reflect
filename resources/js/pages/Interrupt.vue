@@ -54,7 +54,9 @@ const startRecording = async () => {
         mediaRecorder.value = new MediaRecorder(stream.value, mimeType ? { mimeType } : {});
 
         mediaRecorder.value.ondataavailable = (event) => {
-            if (event.data.size > 0) audioChunks.value.push(event.data);
+            if (event.data.size > 0) {
+                audioChunks.value.push(event.data);
+            }
         };
 
         mediaRecorder.value.onstop = async () => {
