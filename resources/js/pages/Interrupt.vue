@@ -6,9 +6,14 @@ import axios from 'axios';
 
 const prompt = ref({ id: null, body: 'Loading...' });
 const entry = ref('');
+const pendingText = ref('');
 const isRecording = ref(false);
+const isFinalizing = ref(false);
 const sessionId = ref(typeof window !== 'undefined' ? crypto.randomUUID() : '');
 const stream = ref<MediaStream | null>(null);
+const audioContext = ref<AudioContext | null>(null);
+const analyser = ref<AnalyserNode | null>(null);
+const SILENCE_THRESHOLD = 0.01;
 
 onMounted(async () => {
     if (!sessionId.value) {
@@ -21,19 +26,16 @@ onMounted(async () => {
 
     // Listen for transcription chunks
     if (window.Echo) {
-        console.log(`Subscribing to channel: transcription.${sessionId.value}`);
         window.Echo.channel(`transcription.${sessionId.value}`)
             .listen('.TranscriptionChunkProcessed', (e: { text: string }) => {
-                console.log('Transcription event received:', e);
                 if (e.text) {
                     const newText = e.text.trim();
                     if (newText) {
+                        // Immediate append - no delay
                         entry.value = entry.value ? `${entry.value.trim()} ${newText}` : newText;
                     }
                 }
             });
-    } else {
-        console.error('Laravel Echo is not initialized on window');
     }
 });
 
@@ -55,7 +57,16 @@ const toggleRecording = async () => {
 const startRecording = async () => {
     try {
         stream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Setup Web Audio API for silence detection
+        audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const source = audioContext.value.createMediaStreamSource(stream.value);
+        analyser.value = audioContext.value.createAnalyser();
+        analyser.value.fftSize = 256;
+        source.connect(analyser.value);
+
         isRecording.value = true;
+        isFinalizing.value = false;
         recordNextChunk();
     } catch (error) {
         console.error('Failed to start recording:', error);
@@ -64,11 +75,25 @@ const startRecording = async () => {
 };
 
 const stopRecording = () => {
+    if (!isRecording.value) return;
+
     isRecording.value = false;
+    isFinalizing.value = true;
+
     if (stream.value) {
         stream.value.getTracks().forEach(track => track.stop());
         stream.value = null;
     }
+
+    if (audioContext.value) {
+        audioContext.value.close();
+        audioContext.value = null;
+    }
+
+    // Keep it locked for 3 seconds to catch the last few "late" events from the AI
+    setTimeout(() => {
+        isFinalizing.value = false;
+    }, 3000);
 };
 
 const getSupportedMimeType = () => {
@@ -82,39 +107,60 @@ const getSupportedMimeType = () => {
 };
 
 const recordNextChunk = () => {
-    if (!isRecording.value || !stream.value) return;
+    if (!isRecording.value || !stream.value || !analyser.value) return;
 
     const mimeType = getSupportedMimeType();
     const recorder = new MediaRecorder(stream.value, mimeType ? { mimeType } : {});
     const chunks: Blob[] = [];
+
+    // Check for volume during the chunk
+    let maxVolume = 0;
+    const dataArray = new Uint8Array(analyser.value.frequencyBinCount);
+    const volumeCheckInterval = setInterval(() => {
+        if (!analyser.value) return;
+        analyser.value.getByteTimeDomainData(dataArray);
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const val = (dataArray[i] - 128) / 128;
+            const volume = Math.abs(val);
+            if (volume > maxVolume) maxVolume = volume;
+        }
+    }, 100);
 
     recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunks.push(e.data);
     };
 
     recorder.onstop = async () => {
+        clearInterval(volumeCheckInterval);
+
         if (chunks.length > 0) {
-            const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-            sendChunk(blob); // Don't await here, send it in the background
+            // Only send if max volume detected during this chunk was above threshold
+            if (maxVolume > SILENCE_THRESHOLD) {
+                const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+                sendChunk(blob);
+            } else {
+                console.log('Skipping silent chunk (max volume: ' + maxVolume.toFixed(4) + ')');
+            }
         }
     };
 
     recorder.start();
-    
-    // Start the next recorder slightly BEFORE this one stops to ensure no gaps
+
+    // 3-second chunks strike a good balance
     setTimeout(() => {
         if (isRecording.value) {
             recordNextChunk();
         }
-    }, 2000); // 2-second chunks for low latency
+    }, 3000);
 
-    // Stop this recorder after a tiny overlap
     setTimeout(() => {
         if (recorder.state === 'recording') {
             recorder.stop();
         }
-    }, 2100); 
-};
+    }, 3100);
+    };
+
 
 const sendChunk = async (blob: Blob) => {
     const extension = blob.type.includes('mp4') ? 'm4a' : 'webm';
@@ -130,7 +176,7 @@ const sendChunk = async (blob: Blob) => {
 };
 
 const sendEntry = async () => {
-    if (!entry.value.trim()) return;
+    if (!entry.value.trim() || isRecording.value) return;
 
     try {
         const response = await fetch(InterruptController.store().url, {
@@ -162,26 +208,34 @@ const sendEntry = async () => {
 
     <div class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 font-mono">
         <!-- Challenger Prompt -->
-        <div class="max-w-2xl text-center space-y-8">
-            <h1 class="text-2xl md:text-4xl font-bold leading-tight animate-pulse">
+        <div class="max-w-2xl text-center space-y-8 mb-12">
+            <h1 class="text-2xl md:text-4xl font-bold leading-tight animate-pulse text-zinc-100">
                 {{ prompt.body }}
             </h1>
         </div>
 
         <!-- Input Area -->
         <div class="fixed bottom-12 w-full max-w-xl px-4">
-            <div class="relative flex items-center bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-colors">
+            <div class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
+                 :class="{
+                    'ring-1 ring-red-500/30 border-red-500/50': isRecording,
+                    'ring-1 ring-amber-500/30 border-amber-500/50': isFinalizing && !isRecording
+                 }">
+
                 <textarea
                     v-model="entry"
-                    class="w-full bg-transparent border-none focus:ring-0 p-4 pr-24 resize-none min-h-[56px] max-h-32 text-zinc-200 placeholder-zinc-500"
-                    placeholder="Speak your truth..."
+                    :readonly="isRecording || isFinalizing"
+                    class="w-full bg-transparent border-none focus:ring-0 p-4 pr-24 resize-none min-h-[120px] max-h-64 text-zinc-200 placeholder-zinc-500 transition-opacity"
+                    :class="{ 'opacity-80 pointer-events-none': isRecording || isFinalizing }"
+                    :placeholder="isRecording ? 'Listening...' : (isFinalizing ? 'Finishing up...' : 'Speak your truth...')"
                     @keydown.enter.prevent="sendEntry"
                 ></textarea>
 
-                <div class="absolute right-2 flex items-center space-x-1">
+                <div class="absolute right-2 bottom-2 flex items-center space-x-1">
                     <button
                         @click="toggleRecording"
-                        class="p-2 rounded-md transition-all duration-300"
+                        :disabled="isFinalizing && !isRecording"
+                        class="p-2 rounded-md transition-all duration-300 disabled:opacity-30"
                         :class="isRecording ? 'text-red-500 bg-red-500/10' : 'text-zinc-400 hover:text-zinc-200'"
                         :title="isRecording ? 'Stop Recording' : 'Start Voice Input'"
                     >
@@ -193,13 +247,22 @@ const sendEntry = async () => {
                     <button
                         @click="sendEntry"
                         class="p-2 text-zinc-400 hover:text-white transition-colors"
-                        :disabled="!entry.trim()"
+                        :disabled="!entry.trim() || isRecording || isFinalizing"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                         </svg>
                     </button>
                 </div>
+            </div>
+
+            <div class="mt-2 text-center h-4">
+                <p v-if="isRecording" class="text-[10px] uppercase tracking-[0.2em] text-red-500/60 animate-pulse">
+                    Recording Active &bull; Text Area Locked
+                </p>
+                <p v-else-if="isFinalizing" class="text-[10px] uppercase tracking-[0.2em] text-amber-500/60 animate-pulse">
+                    Capturing remaining audio...
+                </p>
             </div>
         </div>
     </div>
@@ -213,5 +276,14 @@ textarea::-webkit-scrollbar {
 textarea::-webkit-scrollbar-thumb {
     background: #27272a;
     border-radius: 2px;
+}
+
+.animate-in {
+    animation: animate-in 0.7s ease-out forwards;
+}
+
+@keyframes animate-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 </style>
