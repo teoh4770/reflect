@@ -5,6 +5,10 @@ import InterruptController from "@/actions/App/Http/Controllers/InterruptControl
 import axios from 'axios';
 
 const prompt = ref({ id: null, body: 'Loading...' });
+const activeSlot = ref({ id: null, time: '' });
+const nextSlotAt = ref<string | null>(null);
+const status = ref<'loading' | 'active' | 'locked'>('loading');
+
 const entry = ref('');
 const isRecording = ref(false);
 const isTranscribing = ref(false);
@@ -13,19 +17,65 @@ const stream = ref<MediaStream | null>(null);
 const mediaRecorder = ref<MediaRecorder | null>(null);
 const audioChunks = ref<Blob[]>([]);
 const recordingDuration = ref(0);
+const countdown = ref('');
 let timerInterval: any = null;
+let countdownInterval: any = null;
+
+const fetchState = async () => {
+    status.value = 'loading';
+    try {
+        const response = await fetch(InterruptController.index().url);
+        const data = await response.json();
+
+        if (data.status === 'active') {
+            prompt.value = data.prompt;
+            activeSlot.value = data.slot;
+            status.value = 'active';
+        } else {
+            nextSlotAt.value = data.next_slot_at;
+            status.value = 'locked';
+            startCountdown();
+        }
+    } catch (error) {
+        console.error('Failed to fetch state:', error);
+    }
+};
+
+const startCountdown = () => {
+    if (countdownInterval) clearInterval(countdownInterval);
+    
+    const update = () => {
+        if (!nextSlotAt.value) return;
+        const target = new Date(nextSlotAt.value.replace(/-/g, '/')).getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        if (diff <= 0) {
+            clearInterval(countdownInterval);
+            fetchState();
+            return;
+        }
+
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+        countdown.value = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    update();
+    countdownInterval = setInterval(update, 1000);
+};
 
 onMounted(async () => {
     if (!sessionId.value) {
         sessionId.value = crypto.randomUUID();
     }
-
-    const response = await fetch(InterruptController.index().url);
-    prompt.value = await response.json();
+    await fetchState();
 });
 
 onUnmounted(() => {
     stopRecording();
+    if (countdownInterval) clearInterval(countdownInterval);
     if (window.Echo) {
         window.Echo.leaveChannel(`transcription.${sessionId.value}`);
     }
@@ -47,16 +97,13 @@ const startRecording = async () => {
         const mimeType = [
             'audio/webm;codecs=opus',
             'audio/webm',
-            'audio/ogg;codecs=opus',
             'audio/mp4',
         ].find(type => MediaRecorder.isTypeSupported(type));
 
         mediaRecorder.value = new MediaRecorder(stream.value, mimeType ? { mimeType } : {});
 
         mediaRecorder.value.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.value.push(event.data);
-            }
+            if (event.data.size > 0) audioChunks.value.push(event.data);
         };
 
         mediaRecorder.value.onstop = async () => {
@@ -129,13 +176,16 @@ const sendEntry = async () => {
         const response = await fetch(InterruptController.store().url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ prompt_id: prompt.value.id, body: entry.value }),
+            body: JSON.stringify({ 
+                prompt_id: prompt.value.id, 
+                body: entry.value,
+                slot_id: activeSlot.value.id
+            }),
         });
 
         if (response.ok) {
             entry.value = '';
-            const nextResponse = await fetch(InterruptController.index().url);
-            prompt.value = await nextResponse.json();
+            await fetchState();
         }
     } catch (error) {
         console.error('Failed to save entry:', error);
@@ -147,78 +197,106 @@ const sendEntry = async () => {
     <Head title="Interrupt" />
 
     <div class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 font-mono">
-        <!-- Challenger Prompt -->
-        <div class="max-w-2xl text-center space-y-8 mb-12">
-            <h1 class="text-2xl md:text-4xl font-bold leading-tight text-zinc-100 transition-opacity duration-1000"
-                :class="{ 'opacity-20': isRecording }">
-                {{ prompt.body }}
-            </h1>
+        
+        <!-- LOADING STATE -->
+        <div v-if="status === 'loading'" class="flex items-center space-x-2 text-zinc-500">
+            <div class="w-1 h-1 bg-zinc-500 rounded-full animate-ping"></div>
+            <span class="text-[10px] uppercase tracking-widest">Initialising...</span>
         </div>
 
-        <!-- Recording State Display -->
-        <div v-if="isRecording" class="flex flex-col items-center space-y-4 mb-32 animate-in fade-in zoom-in duration-500">
-            <div @click="stopRecording" class="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 flex items-center justify-center relative">
-                <div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20"></div>
-                <div class="w-6 h-6 rounded-sm bg-red-500"></div>
+        <!-- LOCKED STATE -->
+        <div v-else-if="status === 'locked'" class="flex flex-col items-center space-y-12 animate-in fade-in duration-1000">
+            <div class="text-center space-y-2">
+                <div class="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">Ritual Closed</div>
+                <h1 class="text-4xl md:text-6xl font-bold tabular-nums tracking-tighter text-zinc-300">
+                    {{ countdown }}
+                </h1>
             </div>
-            <span class="text-3xl font-bold text-red-500 tabular-nums tracking-tighter">{{ formatTime(recordingDuration) }}</span>
-            <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 animate-pulse">Capturing Thought</span>
-        </div>
-
-        <!-- Transcription Loading -->
-        <div v-if="isTranscribing" class="flex flex-col items-center space-y-4 mb-32">
-            <div class="flex space-x-2">
-                <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-            </div>
-            <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500">Processing Audio</span>
-        </div>
-
-        <!-- Input Area -->
-        <div class="fixed bottom-12 w-full max-w-xl px-4 transition-all duration-700"
-             :class="{ 'opacity-0 translate-y-8 pointer-events-none': isRecording }">
-
-            <div class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
-                 :class="{ 'ring-1 ring-zinc-700': isTranscribing }">
-
-                <textarea
-                    v-model="entry"
-                    :disabled="isTranscribing"
-                    class="w-full bg-transparent border-none focus:ring-0 p-4 pr-24 resize-none min-h-[140px] max-h-64 text-zinc-200 placeholder-zinc-600 transition-opacity"
-                    :class="{ 'opacity-50': isTranscribing }"
-                    :placeholder="isTranscribing ? 'Awaiting transcription...' : 'Speak your truth...'"
-                ></textarea>
-
-                <div class="absolute right-2 bottom-2 flex items-center space-x-1">
-                    <button
-                        @click="toggleRecording"
-                        class="p-2 rounded-md transition-all duration-300 text-zinc-500 hover:text-zinc-200"
-                        title="Start Recording"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                        </svg>
-                    </button>
-
-                    <button
-                        @click="sendEntry"
-                        class="p-2 text-zinc-500 hover:text-white transition-colors"
-                        :disabled="!entry.trim() || isTranscribing"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="mt-4 text-center">
-                <p class="text-[9px] text-zinc-700 uppercase tracking-[0.3em]">
-                    Record &bull; Review &bull; Commit
+            
+            <div class="max-w-xs text-center">
+                <p class="text-zinc-500 text-xs leading-relaxed italic">
+                    The excavation is silent. Return when the next window opens to break the autopilot.
                 </p>
             </div>
+
+            <div class="h-px w-12 bg-zinc-800"></div>
         </div>
+
+        <!-- ACTIVE STATE -->
+        <template v-else-if="status === 'active'">
+            <!-- Challenger Prompt -->
+            <div class="max-w-2xl text-center space-y-8 mb-12">
+                <h1 class="text-2xl md:text-4xl font-bold leading-tight text-zinc-100 transition-opacity duration-1000"
+                    :class="{ 'opacity-20': isRecording }">
+                    {{ prompt.body }}
+                </h1>
+            </div>
+
+            <!-- Recording State Display -->
+            <div v-if="isRecording" class="flex flex-col items-center space-y-4 mb-32 animate-in fade-in zoom-in duration-500">
+                <div @click="stopRecording" class="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 flex items-center justify-center relative cursor-pointer group">
+                    <div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:opacity-40"></div>
+                    <div class="w-6 h-6 rounded-sm bg-red-500 group-hover:scale-110 transition-transform"></div>
+                </div>
+                <span class="text-3xl font-bold text-red-500 tabular-nums tracking-tighter">{{ formatTime(recordingDuration) }}</span>
+                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 animate-pulse">Capturing Thought</span>
+            </div>
+
+            <!-- Transcription Loading -->
+            <div v-if="isTranscribing" class="flex flex-col items-center space-y-4 mb-32">
+                <div class="flex space-x-2">
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                    <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                </div>
+                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500">Processing Audio</span>
+            </div>
+
+            <!-- Input Area -->
+            <div class="fixed bottom-12 w-full max-w-xl px-4 transition-all duration-700"
+                 :class="{ 'opacity-0 translate-y-8 pointer-events-none': isRecording }">
+                
+                <div class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
+                     :class="{ 'ring-1 ring-zinc-700': isTranscribing }">
+                    
+                    <textarea
+                        v-model="entry"
+                        :disabled="isTranscribing"
+                        class="w-full bg-transparent border-none focus:ring-0 p-4 pr-24 resize-none min-h-[140px] max-h-64 text-zinc-200 placeholder-zinc-600 transition-opacity"
+                        :class="{ 'opacity-50': isTranscribing }"
+                        :placeholder="isTranscribing ? 'Awaiting transcription...' : 'Speak your truth...'"
+                    ></textarea>
+
+                    <div class="absolute right-2 bottom-2 flex items-center space-x-1">
+                        <button
+                            @click="toggleRecording"
+                            class="p-2 rounded-md transition-all duration-300 text-zinc-500 hover:text-zinc-200"
+                            title="Start Recording"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            </svg>
+                        </button>
+
+                        <button
+                            @click="sendEntry"
+                            class="p-2 text-zinc-500 hover:text-white transition-colors"
+                            :disabled="!entry.trim() || isTranscribing"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <p class="text-[9px] text-zinc-700 uppercase tracking-[0.3em]">
+                        Record &bull; Review &bull; Commit
+                    </p>
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
