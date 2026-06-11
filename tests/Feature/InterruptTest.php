@@ -151,3 +151,4 @@ class InterruptTest extends TestCase
         $this->assertNotEquals($prompt1Id, $res2->json('prompt.id'));
     }
 }
+
