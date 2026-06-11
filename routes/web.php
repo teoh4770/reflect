@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\InterruptController;
+use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\TranscriptionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,4 +16,5 @@ Route::get('/interrupt', function () {
 
 Route::get('/api/interrupt', [InterruptController::class, 'index']);
 Route::post('/api/entries', [InterruptController::class, 'store']);
+Route::post('/api/summary', [SummaryController::class, 'store']);
 Route::post('/api/transcribe-chunk', TranscriptionController::class);
