@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('entries', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('prompt_id')->constrained()->cascadeOnDelete();
             $table->text('body');
             $table->json('metadata')->nullable();

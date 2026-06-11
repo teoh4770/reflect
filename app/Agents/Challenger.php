@@ -2,6 +2,7 @@
 
 namespace App\Agents;
 
+use App\Tools\FetchEntries;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
@@ -58,6 +59,8 @@ class Challenger implements Agent, Conversational, HasTools
      */
     public function tools(): iterable
     {
-        return [];
+        return [
+            new FetchEntries($this->user),
+        ];
     }
 }
