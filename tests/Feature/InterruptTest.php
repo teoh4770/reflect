@@ -64,8 +64,6 @@ class InterruptTest extends TestCase
         $this->assertEquals($nextPrompt['id'], $currentPrompt['id']);
     }
 
-    // Todo: reset the active state for interrupt at midnight
-
     public function test_it_returns_a_prompt_that_already_active_during_an_active_slot_window()
     {
         Carbon::setTestNow('2026-06-10 11:30:00');
