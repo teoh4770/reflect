@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ritual');
             $table->text('body');
+            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }

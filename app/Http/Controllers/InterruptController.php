@@ -39,8 +39,25 @@ class InterruptController extends Controller
             ->whereDate('created_at', $now->toDateString())
             ->pluck('prompt_id');
 
+        // get the currently active prompt that's not in used prompt ids
+        // if exists, return active response
+        $activePrompt = Prompt::query()
+            ->where('ritual', 'interrupt')
+            ->whereNotIn('id', $usedPromptIds)
+            ->where('active', true)
+            ->first();
+
+        if ($activePrompt) {
+            return response()->json([
+                'status' => 'active',
+                'prompt' => $activePrompt,
+                'slot' => $activeSlot,
+            ]);
+        }
+
         $prompt = Prompt::query()
             ->where('ritual', 'interrupt')
+            ->whereNot('active')
             ->whereNotIn('id', $usedPromptIds)
             ->inRandomOrder()
             ->first();
@@ -48,6 +65,10 @@ class InterruptController extends Controller
         if (!$prompt) {
             return response()->json(['error' => 'No prompts available'], 404);
         }
+
+        $prompt->update([
+            'active' => true
+        ]);
 
         return response()->json([
             'status' => 'active',
@@ -90,7 +111,7 @@ class InterruptController extends Controller
         $entry = Entry::query()->create([
             'prompt_id' => $validated['prompt_id'],
             'body' => $validated['body'],
-            'metadata' => ['slot_id' => (int) $validated['slot_id']]
+            'metadata' => ['slot_id' => (int)$validated['slot_id']]
         ]);
 
         return response()->json($entry, 201);

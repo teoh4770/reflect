@@ -8,6 +8,11 @@ class Prompt extends Model
 {
     protected $fillable = [
         'ritual',
-        'body'
+        'body',
+        'active'
+    ];
+
+    protected $casts = [
+        'active' => 'boolean'
     ];
 }

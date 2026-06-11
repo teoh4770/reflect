@@ -47,6 +47,31 @@ class InterruptTest extends TestCase
 
         $response = $this->getJson('/api/interrupt');
 
+        $currentPrompt = $response->json('prompt');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'active',
+                'slot' => ['time' => '11:00:00']
+            ])
+            ->assertJsonStructure(['prompt' => ['id', 'body']]);
+
+        // Make another call to interrupt api
+        $response = $this->getJson('/api/interrupt');
+
+        $nextPrompt = $response->json('prompt');
+
+        $this->assertEquals($nextPrompt['id'], $currentPrompt['id']);
+    }
+
+    // Todo: reset the active state for interrupt at midnight
+
+    public function test_it_returns_a_prompt_that_already_active_during_an_active_slot_window()
+    {
+        Carbon::setTestNow('2026-06-10 11:30:00');
+
+        $response = $this->getJson('/api/interrupt');
+
         $response->assertStatus(200)
             ->assertJson([
                 'status' => 'active',
@@ -107,7 +132,7 @@ class InterruptTest extends TestCase
     {
         Carbon::setTestNow('2026-06-10 11:30:00');
         $slot1 = ScheduleSlot::where('time', '11:00:00')->first();
-        
+
         // Get first prompt
         $res1 = $this->getJson('/api/interrupt');
         $prompt1Id = $res1->json('prompt.id');
@@ -122,7 +147,7 @@ class InterruptTest extends TestCase
         // Move to next slot
         Carbon::setTestNow('2026-06-10 14:00:00');
         $res2 = $this->getJson('/api/interrupt');
-        
+
         $this->assertNotEquals($prompt1Id, $res2->json('prompt.id'));
     }
 }
