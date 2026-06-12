@@ -4,11 +4,14 @@ namespace Tests\Feature\Agents;
 
 use App\Agents\Challenger;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Tests\TestCase;
 
 class ChallengerTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_it_includes_the_users_identity_statement_in_instructions()
     {
         $user = User::factory()->create([
