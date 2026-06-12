@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
-import Navigation from '@/components/Navigation.vue';
+import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
+import { ref, onMounted } from 'vue';
+import Navigation from '@/components/Navigation.vue';
 
 interface Summary {
     id: number;
@@ -22,6 +22,7 @@ const selectedSummary = ref<Summary | null>(null);
 
 const fetchSummaries = async () => {
     loading.value = true;
+
     try {
         const response = await axios.get('/api/summary');
         summaries.value = response.data.summaries;
@@ -35,6 +36,7 @@ const fetchSummaries = async () => {
 
 const finishWeek = async () => {
     generating.value = true;
+
     try {
         const response = await axios.post('/api/summary');
         summaries.value.unshift(response.data);

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import Navigation from '@/components/Navigation.vue';
-import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 import axios from 'axios';
+import { ref, onMounted, onUnmounted } from 'vue';
+import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
+import Navigation from '@/components/Navigation.vue';
 
 const prompt = ref({ id: null, body: 'Loading...' });
 const activeSlot = ref({ id: null, time: '' });
@@ -24,6 +24,7 @@ let countdownInterval: any = null;
 
 const fetchState = async () => {
     status.value = 'loading';
+
     try {
         const response = await fetch(InterruptController.index().url);
         const data = await response.json();
@@ -43,10 +44,15 @@ const fetchState = async () => {
 };
 
 const startCountdown = () => {
-    if (countdownInterval) clearInterval(countdownInterval);
+    if (countdownInterval) {
+clearInterval(countdownInterval);
+}
     
     const update = () => {
-        if (!nextSlotAt.value) return;
+        if (!nextSlotAt.value) {
+return;
+}
+
         const target = new Date(nextSlotAt.value.replace(/-/g, '/')).getTime();
         const now = new Date().getTime();
         const diff = target - now;
@@ -54,6 +60,7 @@ const startCountdown = () => {
         if (diff <= 0) {
             clearInterval(countdownInterval);
             fetchState();
+
             return;
         }
 
@@ -71,12 +78,17 @@ onMounted(async () => {
     if (!sessionId.value) {
         sessionId.value = crypto.randomUUID();
     }
+
     await fetchState();
 });
 
 onUnmounted(() => {
     stopRecording();
-    if (countdownInterval) clearInterval(countdownInterval);
+
+    if (countdownInterval) {
+clearInterval(countdownInterval);
+}
+
     if (window.Echo) {
         window.Echo.leaveChannel(`transcription.${sessionId.value}`);
     }
@@ -104,7 +116,9 @@ const startRecording = async () => {
         mediaRecorder.value = new MediaRecorder(stream.value, mimeType ? { mimeType } : {});
 
         mediaRecorder.value.ondataavailable = (event) => {
-            if (event.data.size > 0) audioChunks.value.push(event.data);
+            if (event.data.size > 0) {
+audioChunks.value.push(event.data);
+}
         };
 
         mediaRecorder.value.onstop = async () => {
@@ -167,11 +181,14 @@ const processFullAudio = async (blob: Blob) => {
 const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const sendEntry = async () => {
-    if (!entry.value.trim() || isRecording.value || isTranscribing.value) return;
+    if (!entry.value.trim() || isRecording.value || isTranscribing.value) {
+return;
+}
 
     try {
         const response = await fetch(InterruptController.store().url, {
