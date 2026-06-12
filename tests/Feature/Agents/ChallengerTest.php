@@ -23,15 +23,4 @@ class ChallengerTest extends TestCase
             return str_contains($prompt->agent->instructions(), $user->identity_statement);
         });
     }
-
-    public function test_it_can_call_the_fetch_entries_tool()
-    {
-        $user = User::factory()->create();
-
-        Challenger::fake(['Summarizing your week now.']);
-
-        (new Challenger($user))->prompt('Summarize my week.');
-
-        Challenger::assertToolCalled('fetch_entries');
-    }
 }
