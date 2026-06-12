@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
+import Navigation from '@/components/Navigation.vue';
 import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 import axios from 'axios';
 
@@ -195,6 +196,7 @@ const sendEntry = async () => {
 
 <template>
     <Head title="Interrupt" />
+    <Navigation />
 
     <div class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 font-mono">
         

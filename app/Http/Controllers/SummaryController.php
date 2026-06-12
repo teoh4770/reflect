@@ -19,6 +19,7 @@ class SummaryController extends Controller
         return response()->json([
             'summaries' => $summaries,
             'is_sunday' => now()->dayOfWeek === 0,
+            'identity_statement' => $request->user()->identity_statement,
         ]);
     }
 

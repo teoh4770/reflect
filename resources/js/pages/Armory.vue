@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
+import Navigation from '@/components/Navigation.vue';
 import axios from 'axios';
 
 interface Summary {
@@ -54,17 +55,18 @@ const formatDate = (dateStr: string) => {
 
 <template>
     <Head title="The Armory" />
+    <Navigation />
 
     <div class="min-h-screen bg-neutral-950 text-neutral-200 p-8 font-serif">
         <div class="max-w-4xl mx-auto space-y-12">
-            
+
             <header class="flex justify-between items-end border-b border-white/10 pb-8">
                 <div>
                     <h1 class="text-4xl font-bold tracking-widest uppercase">The Armory</h1>
                     <p class="text-neutral-500 mt-2 italic">Your collection of past weekly summaries.</p>
                 </div>
 
-                <button 
+                <button
                     @click="finishWeek"
                     :disabled="!isSunday || generating"
                     class="px-8 py-3 border-2 transition-all font-bold uppercase tracking-widest disabled:opacity-20 disabled:cursor-not-allowed"
@@ -85,8 +87,8 @@ const formatDate = (dateStr: string) => {
             </div>
 
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div 
-                    v-for="summary in summaries" 
+                <div
+                    v-for="summary in summaries"
                     :key="summary.id"
                     @click="selectedSummary = summary"
                     class="group bg-neutral-900 border border-white/5 p-6 rounded-xl cursor-pointer hover:border-blue-500/50 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]"

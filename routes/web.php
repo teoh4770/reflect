@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\InterruptController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\TranscriptionController;
@@ -21,5 +22,7 @@ Route::get('/armory', function () {
 Route::get('/api/interrupt', [InterruptController::class, 'index']);
 Route::post('/api/entries', [InterruptController::class, 'store']);
 Route::get('/api/summary', [SummaryController::class, 'index']);
+
 Route::post('/api/summary', [SummaryController::class, 'store']);
+Route::post('/api/identity', [IdentityController::class, 'update']);
 Route::post('/api/transcribe-chunk', TranscriptionController::class);
