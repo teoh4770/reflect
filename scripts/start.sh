@@ -14,6 +14,12 @@ if [ "$RAILWAY_RUN_COMMAND" = "worker" ]; then
     exit 0
 fi
 
+if [ "$RAILWAY_RUN_COMMAND" = "scheduler" ]; then
+    echo "Starting Scheduler..."
+    php artisan schedule:work
+    exit 0
+fi
+
 php artisan migrate --force --seed
 php artisan queue:work --tries=3 &
 
