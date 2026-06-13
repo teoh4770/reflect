@@ -1,9 +1,21 @@
 #!/bin/bash
+
+echo "Debug: RAILWAY_RUN_COMMAND is '$RAILWAY_RUN_COMMAND'"
+
+if [ "$RAILWAY_RUN_COMMAND" = "reverb" ]; then
+    echo "Starting Reverb..."
+    php artisan reverb:start --host 0.0.0.0 --port $PORT
+    exit 0
+fi
+
+if [ "$RAILWAY_RUN_COMMAND" = "worker" ]; then
+    echo "Starting Worker..."
+    php artisan queue:work --tries=3
+    exit 0
+fi
+
 php artisan migrate --force --seed
-php artisan reverb:start --host 0.0.0.0 --port 8081 &
 php artisan queue:work --tries=3 &
-# FrankenPHP (default for Railpack) usually listens on 8080 or $PORT
-# We'll use the default entrypoint behavior if possible, or start it explicitly.
-# For Railpack, we should let the builder handle the web server if we can,
-# but a combined command usually requires us to start the web server ourselves.
+
+echo "Starting Web Server..."
 php artisan serve --host 0.0.0.0 --port $PORT
