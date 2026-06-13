@@ -1,5 +1,5 @@
 #!/bin/bash
-php artisan migrate --force
+php artisan migrate --force --seed
 php artisan reverb:start --host 0.0.0.0 --port 8081 &
 php artisan queue:work --tries=3 &
 # FrankenPHP (default for Railpack) usually listens on 8080 or $PORT
