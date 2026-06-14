@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class InterruptController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $now = now();
         $currentTime = $now->format('H:i:s');
@@ -26,6 +26,7 @@ class InterruptController extends Controller
 
         // Check if the user already submitted an entry for this specific slot today
         $alreadyAnswered = Entry::query()
+            ->where('user_id', $request->user()->id)
             ->whereDate('created_at', $now->toDateString())
             ->where('metadata->slot_id', $activeSlot->id)
             ->exists();
@@ -36,6 +37,7 @@ class InterruptController extends Controller
 
         // Get IDs of prompts already used TODAY to ensure no repeats until reset
         $usedPromptIds = Entry::query()
+            ->where('user_id', $request->user()->id)
             ->whereDate('created_at', $now->toDateString())
             ->pluck('prompt_id');
 
@@ -109,6 +111,7 @@ class InterruptController extends Controller
         ]);
 
         $entry = Entry::query()->create([
+            'user_id' => $request->user()->id,
             'prompt_id' => $validated['prompt_id'],
             'body' => $validated['body'],
             'metadata' => ['slot_id' => (int)$validated['slot_id']]

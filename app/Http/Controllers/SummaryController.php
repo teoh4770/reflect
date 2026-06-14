@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Agents\Challenger;
+use App\Models\User;
 use App\Models\WeeklySummary;
 use Illuminate\Http\Request;
 use Laravel\Ai\Facades\Ai;

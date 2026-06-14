@@ -13,6 +13,15 @@ class TranscriptionControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = \App\Models\User::factory()->create();
+        $this->actingAs($this->user);
+    }
+
     public function test_it_transcribes_a_chunk_and_broadcasts_the_result()
     {
         // 1. Arrange

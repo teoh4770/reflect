@@ -13,9 +13,14 @@ class InterruptTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->user = \App\Models\User::factory()->create();
+        $this->actingAs($this->user);
 
         // Seed some slots
         ScheduleSlot::create(['time' => '11:00:00']);
