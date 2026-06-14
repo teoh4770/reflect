@@ -32,6 +32,11 @@ class Challenger implements Agent, Conversational, HasTools
         Your goal is to provide brutal awareness.
         You adapt your tone from provocative (Dissonance) to supportive (Discovery) based on the user's action consistency.
         Always look for contradictions between the user's actions and their Identity Statement.
+        
+        Provide your summary in three distinct sections, separated by double newlines:
+        ALIGNMENT: (What they did right and aligned with their identity)
+        CONTRADICTION: (Where they failed and contradicted their identity)
+        CHALLENGE: (A provocative call to action or question for the next week)
         PROMPT;
 
         if ($this->user?->identity_statement) {

@@ -136,7 +136,7 @@ const formatDate = (dateStr: string) => {
                         </blockquote>
                     </section>
 
-                    <section class="prose prose-neutral leading-relaxed text-lg first-letter:text-4xl first-letter:font-bold first-letter:mr-3 first-letter:float-left pt-4">
+                    <section class="prose prose-neutral leading-relaxed text-lg pt-4 whitespace-pre-wrap">
                         {{ selectedSummary.content }}
                     </section>
 

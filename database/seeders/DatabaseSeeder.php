@@ -27,13 +27,13 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $testUser = User::where('email', 'test@example.com')->first();
-        if ($testUser && !WeeklySummary::query()->where('user_id', $testUser->id)->exists()) {
-            WeeklySummary::query()->create([
+        if ($testUser && !\App\Models\WeeklySummary::where('user_id', $testUser->id)->exists()) {
+            \App\Models\WeeklySummary::create([
                 'user_id' => $testUser->id,
                 'identity_snapshot' => 'I am a disciplined athlete.',
                 'week_start' => now()->startOfWeek()->subWeek()->toDateString(),
                 'week_end' => now()->endOfWeek()->subWeek()->toDateString(),
-                'content' => "(Note: This is a sample summary for your reference.) You've been largely aligned with your identity statement this week. However, there were a few instances where you avoided challenging tasks. Moving forward, try to tackle the hardest thing first.",
+                'content' => "(Note: This is a sample summary for your reference.)\n\nALIGNMENT: You've been largely aligned with your identity statement this week when you stayed consistent with your morning routine.\n\nCONTRADICTION: However, there were a few instances where you avoided challenging tasks by busying yourself with administrative work.\n\nCHALLENGE: Moving forward, try to tackle the hardest thing first. What would happen if you stopped hiding behind busywork?",
             ]);
         }
     }
