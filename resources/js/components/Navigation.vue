@@ -19,6 +19,13 @@ import { Link } from '@inertiajs/vue3';
             >
                 Armory
             </Link>
+            <Link 
+                href="/settings" 
+                class="transition-colors hover:text-white"
+                :class="[$page.component === 'Settings' ? 'text-white font-bold' : 'text-zinc-500']"
+            >
+                Settings
+            </Link>
         </div>
         <div class="text-zinc-700 hidden md:block">
             Reflect &bull; v1.0

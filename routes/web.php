@@ -26,6 +26,12 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Armory');
     })->name('armory');
 
+    Route::get('/settings', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Settings', [
+            'identity_statement' => $request->user()->identity_statement
+        ]);
+    })->name('settings');
+
     Route::get('/api/interrupt', [InterruptController::class, 'index']);
     Route::post('/api/entries', [InterruptController::class, 'store']);
     Route::get('/api/summary', [SummaryController::class, 'index']);
