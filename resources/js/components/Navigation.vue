@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
-import { onMounted } from 'vue';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
+import { onMounted } from 'vue';
 
 onMounted(() => {
     // --- NATIVE PUSH NOTIFICATIONS (CAPACITOR) ---
@@ -23,9 +23,8 @@ onMounted(() => {
             // When user taps the native notification, go to the app
             router.visit('/');
         });
-    } 
-    // --- WEB PUSH NOTIFICATIONS ---
-    else if (typeof window !== 'undefined' && 'Notification' in window) {
+    } else if (typeof window !== 'undefined' && 'Notification' in window) {
+        // --- WEB PUSH NOTIFICATIONS ---
         if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
             Notification.requestPermission();
         }
