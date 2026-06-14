@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
+import { onMounted, watch } from 'vue';
 import "driver.js/dist/driver.css";
 
 const page = usePage();
@@ -18,7 +18,9 @@ watch(() => page.component, () => {
 });
 
 const runTourLogic = async () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+return;
+}
     
     if (localStorage.getItem('reflect_tour_completed') === 'true') {
         return;
@@ -59,8 +61,7 @@ const runTourLogic = async () => {
             ]
         });
         d.drive();
-    }
-    else if (currentStep === '2' && page.component === 'Settings') {
+    } else if (currentStep === '2' && page.component === 'Settings') {
         const d = driver({
             allowClose: false,
             showProgress: true,
@@ -87,8 +88,7 @@ const runTourLogic = async () => {
             ]
         });
         d.drive();
-    }
-    else if (currentStep === '3' && page.component === 'Armory') {
+    } else if (currentStep === '3' && page.component === 'Armory') {
         const d = driver({
             allowClose: false,
             showProgress: true,
@@ -117,6 +117,3 @@ const runTourLogic = async () => {
     }
 };
 </script>
-
-<template>
-</template>
