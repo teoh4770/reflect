@@ -55,6 +55,13 @@ onMounted(() => {
             >
                 Settings
             </Link>
+            <Link 
+                href="/journal" 
+                class="transition-colors hover:text-white"
+                :class="[$page.component === 'Journal' ? 'text-white font-bold' : 'text-zinc-500']"
+            >
+                Journal
+            </Link>
         </div>
         <div class="text-zinc-700 hidden md:block">
             Reflect &bull; v1.0
