@@ -13,6 +13,7 @@ const status = ref<'loading' | 'active' | 'locked'>('loading');
 const entry = ref('');
 const isRecording = ref(false);
 const isTranscribing = ref(false);
+const isConfirming = ref(false);
 const sessionId = ref(typeof window !== 'undefined' ? crypto.randomUUID() : '');
 const stream = ref<MediaStream | null>(null);
 const mediaRecorder = ref<MediaRecorder | null>(null);
@@ -185,10 +186,21 @@ const formatTime = (seconds: number) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
-const sendEntry = async () => {
+const confirmEntry = () => {
     if (!entry.value.trim() || isRecording.value || isTranscribing.value) {
-return;
-}
+        return;
+    }
+    isConfirming.value = true;
+};
+
+const cancelConfirmation = () => {
+    isConfirming.value = false;
+};
+
+const submitEntry = async () => {
+    if (!entry.value.trim() || isRecording.value || isTranscribing.value) {
+        return;
+    }
 
     try {
         const response = await fetch(InterruptController.store().url, {
@@ -203,6 +215,7 @@ return;
 
         if (response.ok) {
             entry.value = '';
+            isConfirming.value = false;
             await fetchState();
         }
     } catch (error) {
@@ -234,7 +247,7 @@ return;
             
             <div class="max-w-xs text-center">
                 <p class="text-zinc-500 text-xs leading-relaxed italic">
-                    The excavation is silent. Return when the next window opens to break the autopilot.
+                    Take a breath. Return when the next reflection window opens.
                 </p>
             </div>
 
@@ -275,7 +288,7 @@ return;
             <div class="fixed bottom-12 w-full max-w-xl px-4 transition-all duration-700"
                  :class="{ 'opacity-0 translate-y-8 pointer-events-none': isRecording }">
                 
-                <div class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
+                <div v-if="!isConfirming" class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
                      :class="{ 'ring-1 ring-zinc-700': isTranscribing }">
                     
                     <textarea
@@ -298,13 +311,41 @@ return;
                         </button>
 
                         <button
-                            @click="sendEntry"
+                            @click="confirmEntry"
                             class="p-2 text-zinc-500 hover:text-white transition-colors"
                             :disabled="!entry.trim() || isTranscribing"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                             </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div v-else class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 space-y-6 animate-in fade-in zoom-in duration-300">
+                    <div>
+                        <h3 class="text-zinc-100 font-bold mb-2">Review Your Entry</h3>
+                        <p class="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap">{{ entry }}</p>
+                    </div>
+                    
+                    <div class="bg-red-500/10 border border-red-500/20 rounded p-4">
+                        <p class="text-red-400 text-xs uppercase tracking-widest text-center">
+                            Warning: You can only submit this once. Ensure your entry is correct.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-4 pt-2">
+                        <button 
+                            @click="cancelConfirmation"
+                            class="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                            Edit
+                        </button>
+                        <button 
+                            @click="submitEntry"
+                            class="px-6 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest rounded hover:bg-zinc-200 transition-colors"
+                        >
+                            Commit
                         </button>
                     </div>
                 </div>
