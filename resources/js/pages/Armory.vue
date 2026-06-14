@@ -95,23 +95,27 @@ const formatDate = (dateStr: string) => {
                 <p class="text-neutral-500 italic">No summaries yet. Finish your first week on Sunday to start your collection.</p>
             </div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div v-else class="relative border-l border-neutral-800 ml-3 md:ml-4 space-y-10 pb-8">
                 <div
                     v-for="summary in summaries"
                     :key="summary.id"
                     @click="selectedSummary = summary"
-                    class="group bg-neutral-900 border border-white/5 p-6 rounded-xl cursor-pointer hover:border-blue-500/50 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]"
+                    class="relative pl-8 md:pl-10 group cursor-pointer"
                 >
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="text-[10px] font-mono uppercase tracking-tighter text-blue-400 font-bold">Week {{ summary.id }}</span>
-                        <span class="text-xs text-neutral-600">{{ formatDate(summary.week_end) }}</span>
+                    <!-- Timeline Dot -->
+                    <div class="absolute -left-[5px] top-6 h-2.5 w-2.5 rounded-full bg-neutral-700 ring-4 ring-neutral-950 group-hover:bg-blue-500 group-hover:ring-blue-500/30 transition-all"></div>
+
+                    <div class="bg-neutral-900 border border-white/5 p-6 rounded-xl hover:border-blue-500/50 transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+                        <div class="flex items-start mb-4">
+                            <span class="text-[10px] font-mono uppercase tracking-tighter text-blue-400 font-bold">{{ formatDate(summary.week_end) }}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-neutral-300 group-hover:text-blue-300 transition-colors truncate">
+                            {{ summary.identity_snapshot || 'My Identity' }}
+                        </h3>
+                        <p class="text-sm text-neutral-500 line-clamp-2 mt-2 font-sans italic whitespace-pre-wrap">
+                            {{ summary.content }}
+                        </p>
                     </div>
-                    <h3 class="text-lg font-bold text-neutral-300 group-hover:text-blue-300 transition-colors truncate">
-                        {{ summary.identity_snapshot || 'My Identity' }}
-                    </h3>
-                    <p class="text-sm text-neutral-500 line-clamp-2 mt-2 font-sans italic">
-                        {{ summary.content }}
-                    </p>
                 </div>
             </div>
         </div>
