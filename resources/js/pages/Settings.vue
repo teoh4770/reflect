@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
-import Navigation from '@/components/Navigation.vue';
 import axios from 'axios';
+import { ref } from 'vue';
+import Navigation from '@/components/Navigation.vue';
 
 const props = defineProps<{
     identity_statement: string | null;
@@ -15,6 +15,7 @@ const saved = ref(false);
 const save = async () => {
     saving.value = true;
     saved.value = false;
+
     try {
         await axios.post('/api/identity', {
             identity_statement: statement.value
