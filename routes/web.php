@@ -22,6 +22,8 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Armory');
     })->name('armory');
 
+    Route::get('/journal', [\App\Http\Controllers\EntryController::class, 'index'])->name('journal');
+
     Route::get('/settings', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Settings', [
             'identity_statement' => $request->user()->identity_statement
