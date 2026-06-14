@@ -2,8 +2,8 @@
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import { ref, onMounted, onUnmounted } from 'vue';
-import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 import Navigation from '@/components/Navigation.vue';
+import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 
 const prompt = ref({ id: null, body: 'Loading...' });
 const activeSlot = ref({ id: null, time: '' });
