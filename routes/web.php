@@ -36,4 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/summary', [SummaryController::class, 'store']);
     Route::post('/api/identity', [IdentityController::class, 'update']);
     Route::post('/api/transcribe-chunk', TranscriptionController::class);
+    Route::post('/api/fcm-token', function (\Illuminate\Http\Request $request) {
+        $request->validate(['token' => 'required|string']);
+        $request->user()->update(['fcm_token' => $request->token]);
+        return response()->json(['success' => true]);
+    });
 });
