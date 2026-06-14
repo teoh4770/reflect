@@ -2,17 +2,19 @@
 import { Head } from '@inertiajs/vue3'
 import Navigation from '@/components/Navigation.vue'
 
-const props = defineProps<{
+defineProps<{
   entriesByWeek: Record<string, any[]>
 }>()
 
 const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'short', day: 'numeric' };
+
   return new Date(dateString).toLocaleDateString('en-US', options);
 }
 
 const formatTime = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: 'numeric', hour12: true };
+
   return new Date(dateString).toLocaleTimeString('en-US', options);
 }
 </script>
@@ -34,7 +36,7 @@ const formatTime = (dateString: string) => {
       <!-- Timeline / Entries -->
       <div class="space-y-16">
         <div v-for="(entries, week) in entriesByWeek" :key="week" class="relative">
-          
+
           <!-- Week Header -->
           <div class="sticky top-20 z-10 bg-black/80 backdrop-blur-md py-4 mb-6 border-b border-zinc-800">
             <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">
@@ -44,8 +46,8 @@ const formatTime = (dateString: string) => {
 
           <!-- Entries Grid -->
           <div class="grid gap-6">
-            <div 
-              v-for="entry in entries" 
+            <div
+              v-for="entry in entries"
               :key="entry.id"
               class="group bg-zinc-900 rounded-lg p-6 md:p-8 transition-all duration-300 border border-zinc-800 hover:border-zinc-600"
             >
@@ -83,7 +85,7 @@ const formatTime = (dateString: string) => {
           </div>
 
         </div>
-        
+
         <div v-if="Object.keys(entriesByWeek).length === 0" class="text-center py-24 bg-zinc-900/50 rounded-lg border border-zinc-800">
           <p class="text-zinc-500 text-sm uppercase tracking-widest">Your journal is empty. No entries yet.</p>
         </div>
@@ -91,7 +93,3 @@ const formatTime = (dateString: string) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Minimal custom scrollbar for textarea could be applied here */
-</style>

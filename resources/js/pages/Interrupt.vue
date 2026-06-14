@@ -190,6 +190,7 @@ const confirmEntry = () => {
     if (!entry.value.trim() || isRecording.value || isTranscribing.value) {
         return;
     }
+
     isConfirming.value = true;
 };
 
