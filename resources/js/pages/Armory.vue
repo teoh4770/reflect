@@ -27,6 +27,9 @@ const fetchSummaries = async () => {
         const response = await axios.get('/api/summary');
         summaries.value = response.data.summaries;
         isSunday.value = response.data.is_sunday;
+
+        console.log(isSunday.value)
+        console.log(summaries.value)
     } catch (error) {
         console.error('Failed to fetch summaries', error);
     } finally {
@@ -59,7 +62,7 @@ const formatDate = (dateStr: string) => {
     <Head title="The Armory" />
     <Navigation />
 
-    <div class="min-h-screen bg-neutral-950 text-neutral-200 p-8 font-serif">
+    <div class="min-h-screen py-16 bg-neutral-950 text-neutral-200 p-8 font-serif">
         <div class="max-w-4xl mx-auto space-y-12">
 
             <header class="flex justify-between items-end border-b border-white/10 pb-8">
