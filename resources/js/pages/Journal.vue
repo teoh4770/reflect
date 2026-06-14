@@ -85,7 +85,7 @@ const formatTime = (dateString: string) => {
         </div>
         
         <div v-if="Object.keys(entriesByWeek).length === 0" class="text-center py-24 bg-zinc-900/50 rounded-lg border border-zinc-800">
-          <p class="text-zinc-500 text-sm uppercase tracking-widest">The excavation is silent. No entries yet.</p>
+          <p class="text-zinc-500 text-sm uppercase tracking-widest">Your journal is empty. No entries yet.</p>
         </div>
       </div>
     </div>
