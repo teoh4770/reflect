@@ -45,12 +45,46 @@ const runTourLogic = async () => {
                     }
                 },
                 {
+                    element: 'textarea',
+                    popover: {
+                        title: 'Review Before Commit',
+                        description: 'Once you write or speak your reflection, you will review it before committing. You only get one chance to submit.',
+                    }
+                },
+                {
+                    element: 'nav a[href="/journal"]',
+                    popover: {
+                        title: 'Your Journal',
+                        description: 'All your committed reflections are securely stored. Let\'s go see your Journal.',
+                        onNextClick: () => {
+                            localStorage.setItem('reflect_tour_step', '2');
+                            d.destroy();
+                            router.visit('/journal');
+                        }
+                    }
+                }
+            ]
+        });
+        d.drive();
+    }
+    else if (currentStep === '2' && page.component === 'Journal') {
+        const d = driver({
+            allowClose: false,
+            showProgress: true,
+            steps: [
+                {
+                    popover: {
+                        title: 'The Timeline',
+                        description: 'This is where all of your past reflections are grouped by week. You can always review what you\'ve written here.',
+                    }
+                },
+                {
                     element: 'nav a[href="/settings"]',
                     popover: {
                         title: 'Define Your Identity',
-                        description: 'Before you can be challenged, you must define who you are. Go to Settings and declare your Identity Statement.',
+                        description: 'Before you can be challenged effectively, you must define who you are. Let\'s go to Settings.',
                         onNextClick: () => {
-                            localStorage.setItem('reflect_tour_step', '2');
+                            localStorage.setItem('reflect_tour_step', '3');
                             d.destroy();
                             router.visit('/settings');
                         }
@@ -60,7 +94,7 @@ const runTourLogic = async () => {
         });
         d.drive();
     }
-    else if (currentStep === '2' && page.component === 'Settings') {
+    else if (currentStep === '3' && page.component === 'Settings') {
         const d = driver({
             allowClose: false,
             showProgress: true,
@@ -78,7 +112,7 @@ const runTourLogic = async () => {
                         title: 'The Armory',
                         description: 'Once you reflect for a week, you compile your responses into a Weekly Summary. Let\'s see the Armory.',
                         onNextClick: () => {
-                            localStorage.setItem('reflect_tour_step', '3');
+                            localStorage.setItem('reflect_tour_step', '4');
                             d.destroy();
                             router.visit('/armory');
                         }
@@ -88,7 +122,7 @@ const runTourLogic = async () => {
         });
         d.drive();
     }
-    else if (currentStep === '3' && page.component === 'Armory') {
+    else if (currentStep === '4' && page.component === 'Armory') {
         const d = driver({
             allowClose: false,
             showProgress: true,
