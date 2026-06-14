@@ -9,16 +9,12 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
-
 Route::get('/login', [AuthController::class, 'show'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/interrupt', function () {
+    Route::get('/', function () {
         return Inertia::render('Interrupt');
     })->name('interrupt');
 
