@@ -17,10 +17,18 @@ class SummaryController extends Controller
             ->orderBy('week_end', 'desc')
             ->get();
 
+        $weekStart = now()->startOfWeek()->toDateString();
+        
+        $alreadyFinished = WeeklySummary::query()
+            ->where('user_id', $request->user()->id)
+            ->where('week_start', $weekStart)
+            ->exists();
+
         return response()->json([
             'summaries' => $summaries,
             'is_sunday' => now()->dayOfWeek === 0,
             'identity_statement' => $request->user()->identity_statement,
+            'already_finished' => $alreadyFinished,
         ]);
     }
 

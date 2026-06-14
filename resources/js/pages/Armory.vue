@@ -16,6 +16,7 @@ interface Summary {
 
 const summaries = ref<Summary[]>([]);
 const isSunday = ref(false);
+const alreadyFinished = ref(false);
 const loading = ref(true);
 const generating = ref(false);
 const selectedSummary = ref<Summary | null>(null);
@@ -27,6 +28,7 @@ const fetchSummaries = async () => {
         const response = await axios.get('/api/summary');
         summaries.value = response.data.summaries;
         isSunday.value = response.data.is_sunday;
+        alreadyFinished.value = response.data.already_finished;
 
         console.log(isSunday.value)
         console.log(summaries.value)
@@ -44,6 +46,7 @@ const finishWeek = async () => {
         const response = await axios.post('/api/summary');
         summaries.value.unshift(response.data);
         selectedSummary.value = response.data;
+        alreadyFinished.value = true;
     } catch (error: any) {
         alert(error.response?.data?.error || 'Failed to generate summary');
     } finally {
@@ -73,11 +76,12 @@ const formatDate = (dateStr: string) => {
 
                 <button
                     @click="finishWeek"
-                    :disabled="!isSunday || generating"
+                    :disabled="!isSunday || generating || alreadyFinished"
                     class="px-8 py-3 border-2 transition-all font-bold uppercase tracking-widest disabled:opacity-20 disabled:cursor-not-allowed"
-                    :class="[isSunday ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-neutral-800 text-neutral-600']"
+                    :class="[isSunday && !alreadyFinished ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-neutral-800 text-neutral-600']"
                 >
                     <span v-if="generating">Analyzing your week...</span>
+                    <span v-else-if="alreadyFinished">Week Finished</span>
                     <span v-else-if="isSunday">Finish the Week</span>
                     <span v-else>Locked until Sunday</span>
                 </button>
