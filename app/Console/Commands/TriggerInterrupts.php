@@ -6,7 +6,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Models\ScheduleSlot;
-use App\Events\InterruptTriggered;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Laravel\Firebase\Facades\Firebase;
@@ -26,9 +25,7 @@ class TriggerInterrupts extends Command
         });
 
         if ($slots->isNotEmpty()) {
-            event(new InterruptTriggered());
-
-            // Send FCM Push Notifications to offline devices
+            // Send FCM Push Notifications to all devices
             $users = User::whereNotNull('fcm_token')->get();
             if ($users->isNotEmpty()) {
                 try {

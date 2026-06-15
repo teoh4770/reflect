@@ -57,24 +57,6 @@ onMounted(() => {
             }
         });
     }
-
-    if (typeof window !== 'undefined' && window.Echo) {
-        window.Echo.channel('interrupts')
-            .listen('.InterruptTriggered', () => {
-                if (Notification.permission === 'granted') {
-                    const notification = new Notification('Time to Reflect', {
-                        body: 'Your next interrupt is ready. Take a moment for brutal awareness.',
-                    });
-
-                    notification.onclick = () => {
-                        window.focus();
-                        router.visit('/');
-                    };
-                } else {
-                    alert('Time to Reflect: Your next interrupt is ready.');
-                }
-            });
-    }
 });
 </script>
 
