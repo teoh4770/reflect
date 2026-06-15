@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use App\Models\ScheduleSlot;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\WebPushConfig;
 use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class TriggerInterrupts extends Command
@@ -39,7 +40,12 @@ class TriggerInterrupts extends Command
                         ->withNotification(Notification::create(
                             'Time to Reflect',
                             "Your {$currentTime} interrupt is ready. Take a moment for brutal awareness."
-                        ));
+                        ))
+                        ->withWebPushConfig(WebPushConfig::fromArray([
+                            'notification' => [
+                                'icon' => '/apple-touch-icon.png'
+                            ]
+                        ]));
 
                     // Firebase limits multicast sending to 500 tokens per request
                     $chunks = array_chunk($tokens, 500);
