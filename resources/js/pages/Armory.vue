@@ -65,19 +65,19 @@ const formatDate = (dateStr: string) => {
     <Head title="The Armory" />
     <Navigation />
 
-    <div class="min-h-screen py-16 bg-neutral-950 text-neutral-200 p-8 font-serif">
+    <div class="min-h-screen pt-8 pb-32 md:py-16 bg-neutral-950 text-neutral-200 px-4 md:px-8 font-serif">
         <div class="max-w-4xl mx-auto space-y-12">
 
-            <header class="flex justify-between items-end border-b border-white/10 pb-8">
+            <header class="flex flex-col md:flex-row md:justify-between md:items-end border-b border-white/10 pb-8 gap-6">
                 <div>
-                    <h1 class="text-4xl font-bold tracking-widest uppercase">The Armory</h1>
-                    <p class="text-neutral-500 mt-2 italic">Your collection of past weekly summaries.</p>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-widest uppercase text-center md:text-left">The Armory</h1>
+                    <p class="text-neutral-500 mt-2 italic text-center md:text-left text-sm md:text-base">Your collection of past weekly summaries.</p>
                 </div>
 
                 <button
                     @click="finishWeek"
                     :disabled="!isSunday || generating || alreadyFinished"
-                    class="px-8 py-3 border-2 transition-all font-bold uppercase tracking-widest disabled:opacity-20 disabled:cursor-not-allowed"
+                    class="w-full md:w-auto px-8 py-3 border-2 transition-all font-bold uppercase tracking-widest text-sm disabled:opacity-20 disabled:cursor-not-allowed"
                     :class="[isSunday && !alreadyFinished ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-neutral-800 text-neutral-600']"
                 >
                     <span v-if="generating">Analyzing your week...</span>
@@ -121,16 +121,16 @@ const formatDate = (dateStr: string) => {
         </div>
 
         <!-- Overlay: The Scroll Reveal (Hybrid Approach) -->
-        <div v-if="selectedSummary" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" @click.self="selectedSummary = null">
-            <div class="max-w-prose w-full bg-[#f4ead5] text-neutral-900 p-8 md:p-12 shadow-2xl relative overflow-y-auto max-h-[90vh] border-x-8 border-[#dcc69c] animate-in fade-in zoom-in duration-300">
-                <button @click="selectedSummary = null" class="absolute top-4 right-4 text-black/30 hover:text-black">
+        <div v-if="selectedSummary" class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/90 backdrop-blur-sm" @click.self="selectedSummary = null">
+            <div class="max-w-prose w-full bg-[#f4ead5] text-neutral-900 p-6 md:p-12 shadow-2xl relative overflow-y-auto max-h-[85vh] border-x-4 md:border-x-8 border-[#dcc69c] animate-in fade-in zoom-in duration-300">
+                <button @click="selectedSummary = null" class="absolute top-2 right-2 md:top-4 md:right-4 text-black/30 hover:text-black p-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
 
-                <div class="space-y-8">
-                    <header class="text-center border-b border-black/10 pb-8">
-                        <h1 class="text-3xl font-bold uppercase tracking-[0.2em] mb-2">Weekly Summary</h1>
-                        <p class="text-xs italic text-neutral-600">Week of {{ formatDate(selectedSummary.week_start) }} — {{ formatDate(selectedSummary.week_end) }}</p>
+                <div class="space-y-6 md:space-y-8">
+                    <header class="text-center border-b border-black/10 pb-6 md:pb-8">
+                        <h1 class="text-2xl md:text-3xl font-bold uppercase tracking-[0.2em] mb-2">Weekly Summary</h1>
+                        <p class="text-[10px] md:text-xs italic text-neutral-600">Week of {{ formatDate(selectedSummary.week_start) }} — {{ formatDate(selectedSummary.week_end) }}</p>
                     </header>
 
                     <section class="space-y-4">
@@ -140,12 +140,12 @@ const formatDate = (dateStr: string) => {
                         </blockquote>
                     </section>
 
-                    <section class="prose prose-neutral leading-relaxed text-lg pt-4 whitespace-pre-wrap">
+                    <section class="prose prose-neutral leading-relaxed text-base md:text-lg pt-4 whitespace-pre-wrap">
                         {{ selectedSummary.content }}
                     </section>
 
-                    <footer class="text-center pt-12">
-                        <button @click="selectedSummary = null" class="px-8 py-3 border-2 border-neutral-900 font-bold uppercase tracking-widest hover:bg-neutral-900 hover:text-white transition-all">
+                    <footer class="text-center pt-8 md:pt-12">
+                        <button @click="selectedSummary = null" class="w-full md:w-auto px-8 py-3 border-2 border-neutral-900 font-bold uppercase tracking-widest hover:bg-neutral-900 hover:text-white transition-all text-sm">
                             Back to Armory
                         </button>
                     </footer>

@@ -33,11 +33,11 @@ const save = async () => {
 <template>
     <Head title="Settings" />
     <Navigation />
-    <div class="min-h-screen bg-[#0a0a0a] text-[#EDEDEC] pt-24 p-6 font-sans">
+    <div class="min-h-screen bg-[#0a0a0a] text-[#EDEDEC] pt-8 md:pt-24 pb-28 md:pb-6 px-4 md:px-6 font-sans">
         <div class="max-w-2xl mx-auto">
-            <h1 class="text-2xl font-bold mb-8 uppercase tracking-widest text-zinc-300 font-mono text-sm">Settings</h1>
+            <h1 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 uppercase tracking-widest text-zinc-300 font-mono">Settings</h1>
             
-            <div class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-6 shadow-sm">
+            <div class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-4 md:p-6 shadow-sm">
                 <h2 class="text-lg font-medium mb-2">Identity Statement</h2>
                 <p class="text-sm text-zinc-400 mb-6">
                     Define who you are or who you are striving to be. This statement will be used by the system to evaluate your weekly activities and hold you accountable.

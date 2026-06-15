@@ -23,22 +23,22 @@ const formatTime = (dateString: string) => {
   <Head title="Journal" />
   <Navigation />
 
-  <div class="min-h-screen bg-black text-white font-mono pt-24 pb-12 px-6">
+  <div class="min-h-screen bg-black text-white font-mono pt-8 md:pt-24 pb-28 md:pb-12 px-4 md:px-6">
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
-      <header class="mb-12 flex justify-between items-end">
+      <header class="mb-8 md:mb-12 flex justify-between items-end">
         <div>
-          <h1 class="text-4xl font-bold tracking-tight text-zinc-100">Your Journal</h1>
-          <p class="text-zinc-500 mt-2 text-sm uppercase tracking-widest">A timeline of your reflections</p>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-zinc-100">Your Journal</h1>
+          <p class="text-zinc-500 mt-2 text-xs md:text-sm uppercase tracking-widest">A timeline of your reflections</p>
         </div>
       </header>
 
       <!-- Timeline / Entries -->
-      <div class="space-y-16">
+      <div class="space-y-12 md:space-y-16">
         <div v-for="(entries, week) in entriesByWeek" :key="week" class="relative">
 
           <!-- Week Header -->
-          <div class="sticky top-20 z-10 bg-black/80 backdrop-blur-md py-4 mb-6 border-b border-zinc-800">
+          <div class="sticky top-4 md:top-20 z-10 bg-black/90 md:bg-black/80 backdrop-blur-md py-4 mb-4 md:mb-6 border-b border-zinc-800">
             <h2 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">
               Week of {{ new Date(week).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}
             </h2>

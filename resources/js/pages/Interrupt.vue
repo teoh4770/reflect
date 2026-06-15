@@ -229,7 +229,7 @@ const submitEntry = async () => {
     <Head title="Interrupt" />
     <Navigation />
 
-    <div class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 font-mono">
+    <div class="min-h-[100dvh] bg-black text-white flex flex-col items-center justify-center px-4 pb-28 md:pb-6 pt-8 md:pt-20 font-mono relative">
         
         <!-- LOADING STATE -->
         <div v-if="status === 'loading'" class="flex items-center space-x-2 text-zinc-500">
@@ -238,10 +238,10 @@ const submitEntry = async () => {
         </div>
 
         <!-- LOCKED STATE -->
-        <div v-else-if="status === 'locked'" class="flex flex-col items-center space-y-12 animate-in fade-in duration-1000">
+        <div v-else-if="status === 'locked'" class="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in duration-1000">
             <div class="text-center space-y-2">
                 <div class="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">Ritual Closed</div>
-                <h1 class="text-4xl md:text-6xl font-bold tabular-nums tracking-tighter text-zinc-300">
+                <h1 class="text-5xl md:text-6xl font-bold tabular-nums tracking-tighter text-zinc-300">
                     {{ countdown }}
                 </h1>
             </div>
@@ -258,8 +258,8 @@ const submitEntry = async () => {
         <!-- ACTIVE STATE -->
         <template v-else-if="status === 'active'">
             <!-- Challenger Prompt -->
-            <div class="max-w-2xl text-center space-y-8 mb-12">
-                <h1 class="text-2xl md:text-4xl font-bold leading-tight text-zinc-100 transition-opacity duration-1000"
+            <div class="max-w-2xl text-center space-y-8 mb-8 md:mb-12">
+                <h1 class="text-2xl md:text-4xl font-bold leading-tight text-zinc-100 transition-opacity duration-1000 px-2"
                     :class="{ 'opacity-20': isRecording }">
                     {{ prompt.body }}
                 </h1>
@@ -286,7 +286,7 @@ const submitEntry = async () => {
             </div>
 
             <!-- Input Area -->
-            <div class="fixed bottom-12 w-full max-w-xl px-4 transition-all duration-700"
+            <div class="fixed bottom-24 md:bottom-12 w-full max-w-xl px-4 transition-all duration-700 z-10"
                  :class="{ 'opacity-0 translate-y-8 pointer-events-none': isRecording }">
                 
                 <div v-if="!isConfirming" class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
