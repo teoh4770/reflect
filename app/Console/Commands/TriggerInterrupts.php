@@ -6,6 +6,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use App\Models\ScheduleSlot;
+use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\WebPushConfig;
@@ -31,10 +32,10 @@ class TriggerInterrupts extends Command
             if ($users->isNotEmpty()) {
                 try {
                     $messaging = Firebase::messaging();
-                    
+
                     // Pluck all tokens
                     $tokens = $users->pluck('fcm_token')->toArray();
-                    
+
                     // Create the base message once
                     $message = CloudMessage::new()
                         ->withNotification(Notification::create(
@@ -58,9 +59,9 @@ class TriggerInterrupts extends Command
                 }
             }
 
-            $this->info("Interrupt triggered at {$currentTime}");
+            Log::info("Interrupt triggered at {$currentTime}");
         } else {
-            $this->info("No interrupt scheduled for {$currentTime}");
+            Log::info("No interrupt scheduled for {$currentTime}");
         }
     }
 }
