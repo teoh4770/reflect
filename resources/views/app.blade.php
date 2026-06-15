@@ -7,6 +7,8 @@
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <link rel="manifest" href="/build/manifest.webmanifest">
+        <meta name="theme-color" content="#000000">
 
         @fonts
 
@@ -14,6 +16,13 @@
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                });
+            }
+        </script>
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
