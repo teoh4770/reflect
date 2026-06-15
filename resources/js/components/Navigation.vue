@@ -31,7 +31,7 @@ onMounted(() => {
 
                 if (permission === 'granted') {
                     const registration = await navigator.serviceWorker.ready;
-                    const currentToken = await getToken(messaging, { 
+                    const currentToken = await getToken(messaging, {
                         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
                         serviceWorkerRegistration: registration
                     });
@@ -47,10 +47,12 @@ onMounted(() => {
 
         setupWebPush();
 
-        onMessage(messaging, (payload) => {
+        onMessage(messaging, async (payload) => {
             if (payload.notification) {
-                new Notification(payload.notification.title || 'Notification', {
+                const registration = await navigator.serviceWorker.ready;
+                await registration.showNotification(payload.notification.title || 'Notification', {
                     body: payload.notification.body,
+                    icon: '/apple-touch-icon.png'
                 });
             }
         });
