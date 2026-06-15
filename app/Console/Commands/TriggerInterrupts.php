@@ -30,19 +30,22 @@ class TriggerInterrupts extends Command
             if ($users->isNotEmpty()) {
                 try {
                     $messaging = Firebase::messaging();
-                    $messages = [];
+                    
+                    // Pluck all tokens
+                    $tokens = $users->pluck('fcm_token')->toArray();
+                    
+                    // Create the base message once
+                    $message = CloudMessage::new()
+                        ->withNotification(Notification::create(
+                            'Time to Reflect',
+                            "Your {$currentTime} interrupt is ready. Take a moment for brutal awareness."
+                        ));
 
-                    foreach ($users as $user) {
-                        $messages[] = CloudMessage::new()
-                            ->withToken($user->fcm_token)
-                            ->withNotification(Notification::create(
-                                'Time to Reflect',
-                                "Your {$currentTime} interrupt is ready. Take a moment for brutal awareness."
-                            ));
-                    }
+                    // Firebase limits multicast sending to 500 tokens per request
+                    $chunks = array_chunk($tokens, 500);
 
-                    if (!empty($messages)) {
-                        $messaging->sendAll($messages);
+                    foreach ($chunks as $chunk) {
+                        $messaging->sendMulticast($message, $chunk);
                     }
                 } catch (\Exception $e) {
                     $this->error("Failed to send FCM notifications: " . $e->getMessage());
