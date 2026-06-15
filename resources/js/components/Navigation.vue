@@ -30,7 +30,11 @@ onMounted(() => {
                 const permission = await Notification.requestPermission();
 
                 if (permission === 'granted') {
-                    const currentToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY });
+                    const registration = await navigator.serviceWorker.ready;
+                    const currentToken = await getToken(messaging, { 
+                        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+                        serviceWorkerRegistration: registration
+                    });
 
                     if (currentToken) {
                         axios.post('/api/fcm-token', { token: currentToken }).catch(() => {});
