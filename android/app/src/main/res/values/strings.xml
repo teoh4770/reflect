@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Reflect App</string>
-    <string name="title_activity_main">Reflect App</string>
-    <string name="package_name">com.reflect.app</string>
-    <string name="custom_url_scheme">com.reflect.app</string>
-</resources>
