@@ -35,11 +35,13 @@ self.addEventListener('notificationclick', (event) => {
             // Check if there is already a window/tab open with the target URL
             for (let i = 0; i < windowClients.length; i++) {
                 const client = windowClients[i];
+
                 // If so, just focus it and navigate to root
                 if (client.url && 'focus' in client) {
                     return client.focus().then(c => c.navigate('/'));
                 }
             }
+
             // If not, open a new window
             if (self.clients.openWindow) {
                 return self.clients.openWindow('/');
