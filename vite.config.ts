@@ -32,14 +32,15 @@ export default defineConfig({
             formVariants: true,
         }),
         VitePWA({
+            strategies: 'injectManifest',
+            srcDir: 'resources/js',
+            filename: 'sw.ts',
             registerType: 'autoUpdate',
             outDir: 'public',
             buildBase: '/',
             scope: '/',
             injectRegister: null,
-            workbox: {
-                navigateFallback: null,
-                cleanupOutdatedCaches: true,
+            injectManifest: {
                 globPatterns: ['**/*.{js,css,woff2,woff}'],
                 manifestTransforms: [
                     async (entries) => {
