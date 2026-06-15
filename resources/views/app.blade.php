@@ -16,13 +16,6 @@
         <x-inertia::head>
             <title>{{ config('app.name', 'Laravel') }}</title>
         </x-inertia::head>
-        <script>
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/firebase-messaging-sw.js');
-                });
-            }
-        </script>
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
