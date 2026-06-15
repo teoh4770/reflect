@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { onMounted } from 'vue';
 
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { onMounted } from 'vue';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,6 +16,7 @@ const firebaseConfig = {
 };
 
 let messaging: any;
+
 if (typeof window !== 'undefined') {
     const app = initializeApp(firebaseConfig);
     messaging = getMessaging(app);
@@ -27,8 +28,10 @@ onMounted(() => {
         const setupWebPush = async () => {
             try {
                 const permission = await Notification.requestPermission();
+
                 if (permission === 'granted') {
                     const currentToken = await getToken(messaging, { vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY });
+
                     if (currentToken) {
                         axios.post('/api/fcm-token', { token: currentToken }).catch(() => {});
                     }
