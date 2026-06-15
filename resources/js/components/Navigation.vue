@@ -51,7 +51,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <nav class="fixed bottom-0 md:top-0 md:bottom-auto left-0 w-full z-40 bg-black/90 md:bg-black/50 backdrop-blur-md border-t md:border-t-0 md:border-b border-white/10 md:border-white/5 px-2 md:px-8 py-4 flex justify-between items-center font-mono text-[10px] md:text-xs uppercase tracking-[0.15em] md:tracking-[0.3em]">
+    <nav class="fixed bottom-0 md:top-0 md:bottom-auto left-0 w-full z-40 bg-black/90 md:bg-black/50 backdrop-blur-md border-t md:border-t-0 md:border-b border-white/10 md:border-white/5 px-2 md:px-8 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] md:py-4 flex justify-between items-center font-mono text-[10px] md:text-xs uppercase tracking-[0.15em] md:tracking-[0.3em]">
         <div class="flex w-full md:w-auto justify-around md:justify-start gap-2 md:gap-8">
             <Link
                 href="/"
