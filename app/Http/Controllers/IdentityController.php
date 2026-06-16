@@ -9,7 +9,7 @@ class IdentityController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'identity_statement' => 'required|string|max:255',
+            'identity_statement' => 'required|string|max:5000',
         ]);
 
         $request->user()->update([
