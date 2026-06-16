@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EntryController;
 use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\InterruptController;
 use App\Http\Controllers\SummaryController;
@@ -22,7 +23,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Armory');
     })->name('armory');
 
-    Route::get('/journal', [\App\Http\Controllers\EntryController::class, 'index'])->name('journal');
+    Route::get('/journal', [EntryController::class, 'index'])->name('journal');
 
     Route::get('/settings', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Settings', [

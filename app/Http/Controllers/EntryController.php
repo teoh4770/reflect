@@ -11,11 +11,10 @@ class EntryController extends Controller
     public function index(Request $request)
     {
         $entries = $request->user()->entries()
-            ->with('prompt') // Assuming prompt relation might be useful
+            ->with('prompt')
             ->orderBy('created_at', 'desc')
             ->get()
             ->groupBy(function($entry) {
-                // Group by week. For example, "Week of 2023-10-09"
                 return $entry->created_at->startOfWeek()->format('Y-m-d');
             });
 

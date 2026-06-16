@@ -12,7 +12,7 @@ class Entry extends Model
         'user_id',
         'prompt_id',
         'body',
-        'metadata'
+        'metadata',
     ];
 
     protected $casts = [
