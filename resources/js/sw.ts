@@ -1,5 +1,6 @@
+/// <reference lib="webworker" />
 import { initializeApp } from 'firebase/app';
-import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
+import { getMessaging, onBackgroundMessage, MessagePayload } from 'firebase/messaging/sw';
 import { precacheAndRoute } from 'workbox-precaching';
 
 declare let self: ServiceWorkerGlobalScope & typeof globalThis;
@@ -19,33 +20,6 @@ const firebaseApp = initializeApp({
 
 const messaging = getMessaging(firebaseApp);
 
-onBackgroundMessage(messaging, (payload) => {
+onBackgroundMessage(messaging, (payload: MessagePayload) => {
     console.log('[sw.ts] Received background message ', payload);
-    // The Firebase SDK automatically displays the notification when the app is in the background 
-    // if the payload contains a 'notification' object. 
-    // Do NOT call self.registration.showNotification() here, or the user will get duplicate notifications!
-});
-
-// Handle notification clicks (applies to both foreground and background notifications)
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    
-    event.waitUntil(
-        self.clients.matchAll({ type: 'window' }).then((windowClients) => {
-            // Check if there is already a window/tab open with the target URL
-            for (let i = 0; i < windowClients.length; i++) {
-                const client = windowClients[i];
-
-                // If so, just focus it and navigate to root
-                if (client.url && 'focus' in client) {
-                    return client.focus().then(c => c.navigate('/'));
-                }
-            }
-
-            // If not, open a new window
-            if (self.clients.openWindow) {
-                return self.clients.openWindow('/');
-            }
-        })
-    );
 });
