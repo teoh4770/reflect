@@ -45,6 +45,9 @@ class TriggerInterrupts extends Command
                         ->withWebPushConfig(WebPushConfig::fromArray([
                             'notification' => [
                                 'icon' => '/apple-touch-icon.png'
+                            ],
+                            'fcm_options' => [
+                                'link' => config('app.url')
                             ]
                         ]));
 
