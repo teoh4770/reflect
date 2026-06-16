@@ -12,9 +12,7 @@ class PromptSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing prompts to ensure a clean state
-        Prompt::query()->where('ritual', 'interrupt')->delete();
-
+        // Avoid deleting existing prompts to prevent cascading deletion of user entries
         $prompts = [
             'What am I avoiding right now by doing what I’m doing?',
             'If someone filmed the last two hours, what would they conclude I want from my life?',
@@ -28,7 +26,7 @@ class PromptSeeder extends Seeder
         ];
 
         foreach ($prompts as $body) {
-            Prompt::query()->create([
+            Prompt::query()->firstOrCreate([
                 'ritual' => 'interrupt',
                 'body' => $body,
             ]);
