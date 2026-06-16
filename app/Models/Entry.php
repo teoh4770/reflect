@@ -21,7 +21,7 @@ class Entry extends Model
 
     public function prompt()
     {
-        return $this->belongsTo(Prompt::class);
+        return $this->belongsTo(Prompt::class)->withTrashed();
     }
 
     public function user()

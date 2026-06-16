@@ -26,7 +26,7 @@ class PromptSeeder extends Seeder
         ];
 
         foreach ($prompts as $body) {
-            Prompt::query()->firstOrCreate([
+            Prompt::query()->withTrashed()->firstOrCreate([
                 'ritual' => 'interrupt',
                 'body' => $body,
             ]);
