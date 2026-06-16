@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
     })->name('settings');
 
     Route::get('/api/interrupt', [InterruptController::class, 'index']);
-    Route::post('/api/entries', [InterruptController::class, 'store']);
+    Route::post('/api/entries', [EntryController::class, 'store']);
     Route::get('/api/summary', [SummaryController::class, 'index']);
     Route::post('/api/summary', [SummaryController::class, 'store']);
     Route::post('/api/identity', [IdentityController::class, 'update']);

@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import {Head} from '@inertiajs/vue3';
 import axios from 'axios';
-import { ref, onMounted, onUnmounted } from 'vue';
+import {ref, onMounted, onUnmounted} from 'vue';
 import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
+import EntryController from "@/actions/App/Http/Controllers/EntryController";
 import Navigation from '@/components/Navigation.vue';
 
-const prompt = ref({ id: null, body: 'Loading...' });
-const activeSlot = ref({ id: null, time: '' });
+const prompt = ref({id: null, body: 'Loading...'});
+const activeSlot = ref({id: null, time: ''});
 const nextSlotAt = ref<string | null>(null);
 const status = ref<'loading' | 'active' | 'locked'>('loading');
 
@@ -46,13 +47,14 @@ const fetchState = async () => {
 
 const startCountdown = () => {
     if (countdownInterval) {
-clearInterval(countdownInterval);
-}
-    
+        clearInterval(countdownInterval);
+    }
+
     const update = () => {
+        console.log(nextSlotAt.value)
         if (!nextSlotAt.value) {
-return;
-}
+            return;
+        }
 
         const target = new Date(nextSlotAt.value.replace(/-/g, '/')).getTime();
         const now = new Date().getTime();
@@ -87,8 +89,8 @@ onUnmounted(() => {
     stopRecording();
 
     if (countdownInterval) {
-clearInterval(countdownInterval);
-}
+        clearInterval(countdownInterval);
+    }
 
     if (window.Echo) {
         window.Echo.leaveChannel(`transcription.${sessionId.value}`);
@@ -105,7 +107,7 @@ const toggleRecording = async () => {
 
 const startRecording = async () => {
     try {
-        stream.value = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.value = await navigator.mediaDevices.getUserMedia({audio: true});
         audioChunks.value = [];
 
         const mimeType = [
@@ -114,16 +116,16 @@ const startRecording = async () => {
             'audio/mp4',
         ].find(type => MediaRecorder.isTypeSupported(type));
 
-        mediaRecorder.value = new MediaRecorder(stream.value, mimeType ? { mimeType } : {});
+        mediaRecorder.value = new MediaRecorder(stream.value, mimeType ? {mimeType} : {});
 
         mediaRecorder.value.ondataavailable = (event) => {
             if (event.data.size > 0) {
-audioChunks.value.push(event.data);
-}
+                audioChunks.value.push(event.data);
+            }
         };
 
         mediaRecorder.value.onstop = async () => {
-            const audioBlob = new Blob(audioChunks.value, { type: mediaRecorder.value?.mimeType || 'audio/webm' });
+            const audioBlob = new Blob(audioChunks.value, {type: mediaRecorder.value?.mimeType || 'audio/webm'});
             await processFullAudio(audioBlob);
         };
 
@@ -204,11 +206,11 @@ const submitEntry = async () => {
     }
 
     try {
-        const response = await fetch(InterruptController.store().url, {
+        const response = await fetch(EntryController.store().url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({ 
-                prompt_id: prompt.value.id, 
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify({
+                prompt_id: prompt.value.id,
                 body: entry.value,
                 slot_id: activeSlot.value.id
             }),
@@ -226,11 +228,12 @@ const submitEntry = async () => {
 </script>
 
 <template>
-    <Head title="Interrupt" />
-    <Navigation />
+    <Head title="Interrupt"/>
+    <Navigation/>
 
-    <div class="min-h-[100dvh] bg-black text-white flex flex-col items-center justify-center px-4 pb-28 md:pb-6 pt-8 md:pt-20 font-mono relative">
-        
+    <div
+        class="min-h-[100dvh] bg-black text-white flex flex-col items-center justify-center px-4 pb-28 md:pb-6 pt-8 md:pt-20 font-mono relative">
+
         <!-- LOADING STATE -->
         <div v-if="status === 'loading'" class="flex items-center space-x-2 text-zinc-500">
             <div class="w-1 h-1 bg-zinc-500 rounded-full animate-ping"></div>
@@ -238,14 +241,15 @@ const submitEntry = async () => {
         </div>
 
         <!-- LOCKED STATE -->
-        <div v-else-if="status === 'locked'" class="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in duration-1000">
+        <div v-else-if="status === 'locked'"
+             class="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in duration-1000">
             <div class="text-center space-y-2">
                 <div class="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">Ritual Closed</div>
                 <h1 class="text-5xl md:text-6xl font-bold tabular-nums tracking-tighter text-zinc-300">
                     {{ countdown }}
                 </h1>
             </div>
-            
+
             <div class="max-w-xs text-center">
                 <p class="text-zinc-500 text-xs leading-relaxed italic">
                     Take a breath. Return when the next reflection window opens.
@@ -266,13 +270,19 @@ const submitEntry = async () => {
             </div>
 
             <!-- Recording State Display -->
-            <div v-if="isRecording" class="flex flex-col items-center space-y-4 mb-32 animate-in fade-in zoom-in duration-500">
-                <div @click="stopRecording" class="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 flex items-center justify-center relative cursor-pointer group">
-                    <div class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:opacity-40"></div>
+            <div v-if="isRecording"
+                 class="flex flex-col items-center space-y-4 mb-32 animate-in fade-in zoom-in duration-500">
+                <div @click="stopRecording"
+                     class="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/50 flex items-center justify-center relative cursor-pointer group">
+                    <div
+                        class="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:opacity-40"></div>
                     <div class="w-6 h-6 rounded-sm bg-red-500 group-hover:scale-110 transition-transform"></div>
                 </div>
-                <span class="text-3xl font-bold text-red-500 tabular-nums tracking-tighter">{{ formatTime(recordingDuration) }}</span>
-                <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 animate-pulse">Capturing Thought</span>
+                <span class="text-3xl font-bold text-red-500 tabular-nums tracking-tighter">{{
+                        formatTime(recordingDuration)
+                    }}</span>
+                <span
+                    class="text-[10px] uppercase tracking-[0.4em] text-zinc-500 animate-pulse">Capturing Thought</span>
             </div>
 
             <!-- Transcription Loading -->
@@ -288,10 +298,11 @@ const submitEntry = async () => {
             <!-- Input Area -->
             <div class="fixed bottom-24 md:bottom-12 w-full max-w-xl px-4 transition-all duration-700 z-10"
                  :class="{ 'opacity-0 translate-y-8 pointer-events-none': isRecording }">
-                
-                <div v-if="!isConfirming" class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
+
+                <div v-if="!isConfirming"
+                     class="relative flex flex-col bg-zinc-900 rounded-lg border border-zinc-800 focus-within:border-zinc-600 transition-all duration-500 overflow-hidden"
                      :class="{ 'ring-1 ring-zinc-700': isTranscribing }">
-                    
+
                     <textarea
                         v-model="entry"
                         :disabled="isTranscribing"
@@ -306,8 +317,10 @@ const submitEntry = async () => {
                             class="p-2 rounded-md transition-all duration-300 text-zinc-500 hover:text-zinc-200"
                             title="Start Recording"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                             </svg>
                         </button>
 
@@ -316,19 +329,22 @@ const submitEntry = async () => {
                             class="p-2 text-zinc-500 hover:text-white transition-colors"
                             :disabled="!entry.trim() || isTranscribing"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
                             </svg>
                         </button>
                     </div>
                 </div>
 
-                <div v-else class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 space-y-6 animate-in fade-in zoom-in duration-300">
+                <div v-else
+                     class="bg-zinc-900 rounded-lg border border-zinc-800 p-6 space-y-6 animate-in fade-in zoom-in duration-300">
                     <div>
                         <h3 class="text-zinc-100 font-bold mb-2">Review Your Entry</h3>
                         <p class="text-zinc-400 text-sm leading-relaxed whitespace-pre-wrap">{{ entry }}</p>
                     </div>
-                    
+
                     <div class="bg-red-500/10 border border-red-500/20 rounded p-4">
                         <p class="text-red-400 text-xs uppercase tracking-widest text-center">
                             Warning: You can only submit this once. Ensure your entry is correct.
@@ -336,13 +352,13 @@ const submitEntry = async () => {
                     </div>
 
                     <div class="flex items-center justify-end space-x-4 pt-2">
-                        <button 
+                        <button
                             @click="cancelConfirmation"
                             class="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors"
                         >
                             Edit
                         </button>
-                        <button 
+                        <button
                             @click="submitEntry"
                             class="px-6 py-2 bg-white text-black text-xs font-bold uppercase tracking-widest rounded hover:bg-zinc-200 transition-colors"
                         >
@@ -350,7 +366,7 @@ const submitEntry = async () => {
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="mt-4 text-center">
                     <p class="text-[9px] text-zinc-700 uppercase tracking-[0.3em]">
                         Record &bull; Review &bull; Commit
@@ -366,6 +382,7 @@ const submitEntry = async () => {
 textarea::-webkit-scrollbar {
     width: 4px;
 }
+
 textarea::-webkit-scrollbar-thumb {
     background: #27272a;
     border-radius: 2px;
@@ -376,7 +393,13 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 @keyframes animate-in {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 </style>

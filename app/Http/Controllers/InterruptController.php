@@ -101,22 +101,4 @@ class InterruptController extends Controller
             'next_slot_at' => $nextSlotTime,
         ]);
     }
-
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'prompt_id' => 'required|exists:prompts,id',
-            'body' => 'required|string',
-            'slot_id' => 'required|exists:schedule_slots,id',
-        ]);
-
-        $entry = Entry::query()->create([
-            'user_id' => $request->user()->id,
-            'prompt_id' => $validated['prompt_id'],
-            'body' => $validated['body'],
-            'metadata' => ['slot_id' => (int)$validated['slot_id']]
-        ]);
-
-        return response()->json($entry, 201);
-    }
 }
