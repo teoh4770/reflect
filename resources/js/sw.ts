@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 import { initializeApp } from 'firebase/app';
-import { getMessaging, onBackgroundMessage, MessagePayload } from 'firebase/messaging/sw';
+import type { MessagePayload } from 'firebase/messaging/sw';
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 import { precacheAndRoute } from 'workbox-precaching';
 
 declare let self: ServiceWorkerGlobalScope & typeof globalThis;
