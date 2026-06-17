@@ -29,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Settings', [
             'identity_statement' => $request->user()->identity_statement,
-            'schedule_slots' => ScheduleSlot::all()
+            'schedule_slots' => ScheduleSlot::query()->orderBy('time')->get()
         ]);
     })->name('settings');
 
