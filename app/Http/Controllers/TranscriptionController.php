@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TranscriptionChunkProcessed;
+use App\Jobs\ProcessTranscriptionChunk;
 use App\Services\TranscriptionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TranscriptionController extends Controller
 {
@@ -22,9 +22,12 @@ class TranscriptionController extends Controller
 
         $audio = $request->file('audio');
 
-        $text = $this->transcriptionService->transcribe($audio);
+        $extension = $audio->getClientOriginalExtension() ?: 'webm';
+        $filename = uniqid('chunk_') . '.' . $extension;
+        $path = $audio->storeAs('temp_audio', $filename, 'local');
+        $fullPath = Storage::disk('local')->path($path);
 
-        broadcast(new TranscriptionChunkProcessed($text, $request->session_id));
+        ProcessTranscriptionChunk::dispatch($fullPath, $request->session_id);
 
         return response()->json(['status' => 'success']);
     }

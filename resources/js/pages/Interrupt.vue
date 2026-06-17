@@ -2,14 +2,15 @@
 import {Head} from '@inertiajs/vue3';
 import axios from 'axios';
 import {ref, onMounted, onUnmounted} from 'vue';
-import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 import EntryController from "@/actions/App/Http/Controllers/EntryController";
+import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
 import Navigation from '@/components/Navigation.vue';
 
 const prompt = ref({id: null, body: 'Loading...'});
 const activeSlot = ref({id: null, time: ''});
 const nextSlotAt = ref<string | null>(null);
 const status = ref<'loading' | 'active' | 'locked'>('loading');
+const errorMessage = ref<string | null>(null);
 
 const entry = ref('');
 const isRecording = ref(false);
@@ -52,6 +53,7 @@ const startCountdown = () => {
 
     const update = () => {
         console.log(nextSlotAt.value)
+
         if (!nextSlotAt.value) {
             return;
         }
@@ -175,9 +177,14 @@ const processFullAudio = async (blob: Blob) => {
         }
 
         await axios.post('/api/transcribe-chunk', formData);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Transcription failed:', error);
+        errorMessage.value = error.response?.data?.reason || error.message || 'Transcription failed';
         isTranscribing.value = false;
+        
+        setTimeout(() => {
+            errorMessage.value = null;
+        }, 5000);
     }
 };
 
@@ -293,6 +300,11 @@ const submitEntry = async () => {
                     <div class="w-2 h-2 bg-zinc-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                 </div>
                 <span class="text-[10px] uppercase tracking-[0.4em] text-zinc-500">Processing Audio</span>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="errorMessage" class="flex flex-col items-center space-y-4 mb-32 bg-red-500/10 border border-red-500/30 px-6 py-3 rounded-lg text-center max-w-sm">
+                <span class="text-sm text-red-400 font-sans leading-snug">{{ errorMessage }}</span>
             </div>
 
             <!-- Input Area -->

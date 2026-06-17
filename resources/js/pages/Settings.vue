@@ -2,8 +2,8 @@
 import {Head} from '@inertiajs/vue3';
 import axios from 'axios';
 import {ref} from 'vue';
-import Navigation from '@/components/Navigation.vue';
 import AuthController from "@/actions/App/Http/Controllers/AuthController";
+import Navigation from '@/components/Navigation.vue';
 
 const props = defineProps<{
     identity_statement: string | null;
