@@ -5,6 +5,7 @@ use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\InterruptController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\TranscriptionController;
+use App\Models\ScheduleSlot;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -27,7 +28,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/settings', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Settings', [
-            'identity_statement' => $request->user()->identity_statement
+            'identity_statement' => $request->user()->identity_statement,
+            'schedule_slots' => ScheduleSlot::all()
         ]);
     })->name('settings');
 

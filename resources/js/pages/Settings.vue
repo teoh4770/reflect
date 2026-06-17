@@ -7,6 +7,7 @@ import AuthController from "@/actions/App/Http/Controllers/AuthController";
 
 const props = defineProps<{
     identity_statement: string | null;
+    schedule_slots: Array<{ id: number; time: string }>;
 }>();
 
 const statement = ref(props.identity_statement || '');
@@ -64,6 +65,24 @@ const save = async () => {
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <div class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-4 md:p-6 shadow-sm mt-6">
+                <h2 class="text-lg font-medium mb-2">Schedule Slots</h2>
+                <p class="text-sm text-zinc-400 mb-4">
+                    Current timeslots configured for interruptions. These are public and cannot be modified here.
+                </p>
+
+                <div v-if="props.schedule_slots && props.schedule_slots.length > 0" class="flex flex-wrap gap-2">
+                    <span
+                        v-for="slot in props.schedule_slots"
+                        :key="slot.id"
+                        class="bg-zinc-800 text-zinc-300 px-3 py-1 rounded-md font-mono text-sm border border-[#3E3E3A]"
+                    >
+                        {{ slot.time }}
+                    </span>
+                </div>
+                <p v-else class="text-sm text-zinc-500 italic">No schedule slots configured.</p>
             </div>
 
             <form class="mt-4" method="post" :action="AuthController.logout().url">
