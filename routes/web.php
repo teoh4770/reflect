@@ -44,4 +44,36 @@ Route::middleware('auth')->group(function () {
         $request->user()->update(['fcm_token' => $request->token]);
         return response()->json(['success' => true]);
     });
+
+    Route::post('/api/test-notification', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        if ($user->email !== 'ck@gmail.com') {
+            abort(403);
+        }
+        if (!$user->fcm_token) {
+            return response()->json(['error' => 'No FCM token'], 400);
+        }
+        
+        try {
+            $messaging = \Kreait\Laravel\Firebase\Facades\Firebase::messaging();
+            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $user->fcm_token)
+                ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
+                    'Test Notification',
+                    'This is a test interrupt ping from Reflect.'
+                ))
+                ->withWebPushConfig(\Kreait\Firebase\Messaging\WebPushConfig::fromArray([
+                    'notification' => [
+                        'icon' => '/apple-touch-icon.png'
+                    ],
+                    'fcm_options' => [
+                        'link' => config('app.url')
+                    ]
+                ]));
+            
+            $messaging->send($message);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    });
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Head} from '@inertiajs/vue3';
+import {Head, usePage} from '@inertiajs/vue3';
 import axios from 'axios';
 import {ref} from 'vue';
 import AuthController from "@/actions/App/Http/Controllers/AuthController";
@@ -28,6 +28,24 @@ const save = async () => {
         console.error(e);
     } finally {
         saving.value = false;
+    }
+};
+
+const page = usePage();
+const user = page.props.auth?.user as any;
+
+const testingNotification = ref(false);
+const testNotification = async () => {
+    testingNotification.value = true;
+
+    try {
+        await axios.post('/api/test-notification');
+        alert('Test notification sent! Check your device.');
+    } catch (e: any) {
+        console.error(e);
+        alert('Failed to send test notification: ' + (e.response?.data?.error || e.message));
+    } finally {
+        testingNotification.value = false;
     }
 };
 </script>
@@ -83,6 +101,20 @@ const save = async () => {
                     </span>
                 </div>
                 <p v-else class="text-sm text-zinc-500 italic">No schedule slots configured.</p>
+            </div>
+
+            <div v-if="user?.email === 'ck@gmail.com'" class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-4 md:p-6 shadow-sm mt-6">
+                <h2 class="text-lg font-medium mb-2 text-yellow-500">Developer Tools</h2>
+                <p class="text-sm text-zinc-400 mb-4">
+                    Only visible to ck@gmail.com
+                </p>
+                <button
+                    @click="testNotification"
+                    :disabled="testingNotification"
+                    class="bg-yellow-600 hover:bg-yellow-500 text-[#161615] font-bold px-6 py-2 rounded-md font-mono text-xs uppercase tracking-wider transition-colors disabled:opacity-50"
+                >
+                    {{ testingNotification ? 'Sending...' : 'Test Notification Ping' }}
+                </button>
             </div>
 
             <form class="mt-4" method="post" :action="AuthController.logout().url">
