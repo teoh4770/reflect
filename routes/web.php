@@ -59,7 +59,8 @@ Route::middleware('auth')->group(function () {
 
         try {
             $messaging = Firebase::messaging();
-            $message = CloudMessage::withTarget('token', $user->fcm_token)
+            $message = CloudMessage::new()
+                ->withToken($user->fcm_token)
                 ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
                     'Test Notification',
                     'This is a test interrupt ping from Reflect.'
