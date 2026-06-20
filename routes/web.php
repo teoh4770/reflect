@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
         if (!$user->fcm_token) {
             return response()->json(['error' => 'No FCM token'], 400);
         }
-        
+
         try {
             $messaging = \Kreait\Laravel\Firebase\Facades\Firebase::messaging();
             $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $user->fcm_token)
@@ -69,10 +69,11 @@ Route::middleware('auth')->group(function () {
                         'link' => config('app.url')
                     ]
                 ]));
-            
+
             $messaging->send($message);
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
+            Log::channel('stderr')->info($e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     });
