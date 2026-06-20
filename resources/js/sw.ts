@@ -19,12 +19,6 @@ const firebaseApp = initializeApp({
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
 });
 
-const messaging = getMessaging(firebaseApp);
-
-onBackgroundMessage(messaging, (payload: MessagePayload) => {
-    console.log('[sw.ts] Received background message ', payload);
-});
-
 self.addEventListener('notificationclick', (event: NotificationEvent) => {
     event.notification.close();
     event.stopImmediatePropagation();
