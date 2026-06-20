@@ -42,8 +42,10 @@ const testNotification = async () => {
         await axios.post('/api/test-notification');
         alert('Test notification sent! Check your device.');
     } catch (e: any) {
+        // Log the actual response body from the server for better debugging
+        console.error("Server Response Data:", e.response?.data);
         console.error(e);
-        alert('Failed to send test notification: ' + (e.response?.data?.error || e.message));
+        alert(`Failed to send test notification: ` + (e.response?.data?.message || e.response?.data?.error || e.message));
     } finally {
         testingNotification.value = false;
     }

@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 use App\Http\Controllers\AuthController;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\WebPushConfig;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 Route::get('/login', [AuthController::class, 'show'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -55,13 +58,13 @@ Route::middleware('auth')->group(function () {
         }
 
         try {
-            $messaging = \Kreait\Laravel\Firebase\Facades\Firebase::messaging();
-            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $user->fcm_token)
+            $messaging = Firebase::messaging();
+            $message = CloudMessage::withTarget('token', $user->fcm_token)
                 ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
                     'Test Notification',
                     'This is a test interrupt ping from Reflect.'
                 ))
-                ->withWebPushConfig(\Kreait\Firebase\Messaging\WebPushConfig::fromArray([
+                ->withWebPushConfig(WebPushConfig::fromArray([
                     'notification' => [
                         'icon' => '/apple-touch-icon.png'
                     ],
