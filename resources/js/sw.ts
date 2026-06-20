@@ -24,3 +24,26 @@ const messaging = getMessaging(firebaseApp);
 onBackgroundMessage(messaging, (payload: MessagePayload) => {
     console.log('[sw.ts] Received background message ', payload);
 });
+
+self.addEventListener('notificationclick', (event: NotificationEvent) => {
+    event.notification.close();
+    event.stopImmediatePropagation();
+
+    const fcmData = event.notification.data?.FCM_MSG;
+    const payloadLink = fcmData?.notification?.click_action || fcmData?.fcmOptions?.link || '/';
+    const urlToOpen = new URL(payloadLink, self.location.origin).href;
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+                if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (self.clients.openWindow) {
+                return self.clients.openWindow(urlToOpen);
+            }
+        })
+    );
+});
