@@ -1,6 +1,5 @@
 /// <reference lib="webworker" />
 import { initializeApp } from 'firebase/app';
-import type { MessagePayload } from 'firebase/messaging/sw';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 import { precacheAndRoute } from 'workbox-precaching';
 
@@ -40,21 +39,19 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
     const payloadLink = fcmData?.notification?.click_action || fcmData?.fcmOptions?.link || '/';
     const urlToOpen = new URL(payloadLink, self.location.origin).href;
 
-    // event.waitUntil(
-    //     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-    //         for (let i = 0; i < windowClients.length; i++) {
-    //             const client = windowClients[i];
-    //             if (client.url.includes(self.location.origin) && 'focus' in client) {
-    //                 return client.focus();
-    //             }
-    //         }
-    //         if (self.clients.openWindow) {
-    //             return self.clients.openWindow(urlToOpen);
-    //         }
-    //     })
-    // );
-
     event.waitUntil(
-        self.clients.openWindow(urlToOpen)
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (let i = 0; i < windowClients.length; i++) {
+                const client = windowClients[i];
+
+                if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+
+            if (self.clients.openWindow) {
+                return self.clients.openWindow(urlToOpen);
+            }
+        })
     );
 });
