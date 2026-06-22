@@ -12,9 +12,9 @@ use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\WebPushConfig;
 use Kreait\Laravel\Firebase\Facades\Firebase;
 
-class TriggerInterrupts extends Command
+class TriggerInterrupt extends Command
 {
-    protected $signature = 'app:trigger-interrupts';
+    protected $signature = 'app:trigger-interrupt';
     protected $description = 'Trigger an interrupt event if the current time matches a schedule slot';
 
     public function handle()

@@ -1,7 +1,7 @@
 <?php
 
 use App\Console\Commands\ResetActivePrompts;
-use App\Console\Commands\TriggerInterrupts;
+use App\Console\Commands\TriggerInterrupt;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -11,4 +11,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(ResetActivePrompts::class)->daily();
-Schedule::command(TriggerInterrupts::class)->everyMinute();
+Schedule::command(TriggerInterrupt::class)->everyMinute();
