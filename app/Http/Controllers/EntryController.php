@@ -29,13 +29,11 @@ class EntryController extends Controller
     {
         $validated = $request->validated();
 
-        $entry = Entry::query()
-            ->where('user_id', $request->user()->id)
-            ->create([
-                'prompt_id' => $validated['prompt_id'],
-                'body' => $validated['body'],
-                'metadata' => ['slot_id' => (int)$validated['slot_id']]
-            ]);
+        $entry = $request->user()->entries()->create([
+            'prompt_id' => $validated['prompt_id'],
+            'body' => $validated['body'],
+            'metadata' => ['slot_id' => (int)$validated['slot_id']]
+        ]);
 
         return response()->json($entry, 201);
     }

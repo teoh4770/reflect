@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Prompt;
 use App\Models\ScheduleSlot;
 use App\Models\Entry;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -19,7 +20,7 @@ class InterruptTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = \App\Models\User::factory()->create();
+        $this->user = User::factory()->create();
         $this->actingAs($this->user);
 
         // Seed some slots
