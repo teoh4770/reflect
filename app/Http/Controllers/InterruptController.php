@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Prompt;
 use App\Models\Entry;
 use App\Models\ScheduleSlot;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 
 class InterruptController extends Controller
@@ -79,26 +80,27 @@ class InterruptController extends Controller
         ]);
     }
 
-    protected function lockedResponse($now)
+    protected function lockedResponse(CarbonInterface $now)
     {
-        $nextSlot = ScheduleSlot::query()
-            ->where('time', '>', $now->format('H:i:s'))
-            ->orderBy('time', 'asc')
+        $firstTimeSlot = ScheduleSlot::query()
+            ->orderBy('time')
             ->first();
 
-        // If no more slots today, the next one is the first slot of tomorrow
-        if (!$nextSlot) {
-            $nextSlot = ScheduleSlot::query()
-                ->orderBy('time', 'asc')
-                ->first();
-            $nextSlotTime = now()->addDay()->format('Y-m-d') . ' ' . $nextSlot->time;
+        $nextTimeSlot = ScheduleSlot::query()
+            ->where('time', '>', $now->format('H:i:s'))
+            ->orderBy('time')
+            ->first();
+
+        if (is_null($nextTimeSlot)) {
+            $tomorrow = now()->addDay()->format('Y-m-d') . ' ' . $firstTimeSlot->time;
+            $nextTimeSlot = $tomorrow;
         } else {
-            $nextSlotTime = $now->toDateString() . ' ' . $nextSlot->time;
+            $nextTimeSlot = $now->format('Y-m-d') . ' ' . $nextTimeSlot->time;
         }
 
         return response()->json([
             'status' => 'locked',
-            'next_slot_at' => $nextSlotTime,
+            'next_slot_at' => $nextTimeSlot,
         ]);
     }
 }
