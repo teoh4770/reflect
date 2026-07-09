@@ -35,4 +35,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Entry::class);
     }
+
+    public function weeklySummaries(): HasMany
+    {
+        return $this->hasMany(WeeklySummary::class);
+    }
 }

@@ -3,30 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Agents\Challenger;
-use App\Models\User;
 use App\Models\WeeklySummary;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Laravel\Ai\Facades\Ai;
+use Laravel\Ai\Responses\AgentResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class SummaryController extends Controller
 {
     public function index(Request $request)
     {
-        $summaries = WeeklySummary::query()
-            ->where('user_id', $request->user()->id)
-            ->orderBy('week_end', 'desc')
+        $summaries = $request->user()->weeklySummaries()
+            ->orderByDesc('week_end')
             ->get();
 
-        $weekStart = now()->startOfWeek()->toDateString();
-        
-        $alreadyFinished = WeeklySummary::query()
-            ->where('user_id', $request->user()->id)
-            ->where('week_start', $weekStart)
+        $alreadyFinished = $request->user()->weeklySummaries()
+            ->whereDate('week_start', now()->startOfWeek())
             ->exists();
 
         return response()->json([
             'summaries' => $summaries,
-            'is_sunday' => now()->dayOfWeek === 0,
+            'is_sunday' => now()->dayOfWeek === Carbon::SUNDAY,
             'identity_statement' => $request->user()->identity_statement,
             'already_finished' => $alreadyFinished,
         ]);
@@ -34,41 +31,42 @@ class SummaryController extends Controller
 
     public function store(Request $request)
     {
-        $now = now();
+        $today = now();
+        $isSunday = $today->copy()->dayOfWeek === Carbon::SUNDAY;
 
-        if ($now->dayOfWeek !== 0) { // 0 is Sunday
+        if (!$isSunday) {
             return response()->json([
                 'error' => 'The "Finish the Week" ritual is only available on Sundays.'
-            ], 403);
+            ], Response::HTTP_FORBIDDEN);
         }
 
-        $user = $request->user();
-        $weekStart = $now->startOfWeek()->toDateString();
-        $weekEnd = $now->endOfWeek()->toDateString();
-
-        // Check if summary already exists for this week
-        $exists = WeeklySummary::query()
-            ->where('user_id', $user->id)
-            ->where('week_start', $weekStart)
+        $summaryExists = $request->user()->weeklySummaries()
+            ->whereDate('week_start', $today->copy()->startOfWeek())
             ->exists();
 
-        if ($exists) {
+        if ($summaryExists) {
             return response()->json([
                 'error' => 'You have already finished this week.'
-            ], 422);
+            ], Response::HTTP_CONFLICT);
         }
 
-        $agent = new Challenger($user);
-        $loot = $agent->prompt("Summarize my week from {$weekStart} to {$weekEnd}. Identify contradictions with my Identity Statement.");
+        $weekStart = $today->copy()->startOfWeek()->toDateString();
+        $weekEnd = $today->copy()->endOfWeek()->toDateString();
 
-        $summary = WeeklySummary::create([
-            'user_id' => $user->id,
+        $summary = WeeklySummary::query()->create([
+            'user_id' => $request->user()->id,
             'week_start' => $weekStart,
             'week_end' => $weekEnd,
-            'identity_snapshot' => $user->identity_statement,
-            'content' => (string) $loot,
+            'identity_snapshot' => $request->user()->identity_statement,
+            'content' => (string)$this->generateWeeklySummary($weekStart, $weekEnd),
         ]);
 
-        return response()->json($summary, 201);
+        return response()->json($summary, Response::HTTP_CREATED);
+    }
+
+    private function generateWeeklySummary(string $weekStart, string $weekEnd): AgentResponse
+    {
+        $agent = Challenger::make(request()->user());
+        return $agent->prompt("Summarize my week from $weekStart to $weekEnd. Identify contradictions with my Identity Statement.");
     }
 }
