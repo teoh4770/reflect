@@ -5,82 +5,91 @@ namespace App\Http\Controllers;
 use App\Models\Prompt;
 use App\Models\Entry;
 use App\Models\ScheduleSlot;
+use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Response;
 
 class InterruptController extends Controller
 {
     public function index(Request $request)
     {
-        $now = now();
-        $currentTime = $now->format('H:i:s');
+        $time = now();
 
-        // Find the active slot (the latest slot that has already passed today)
-        $activeSlot = ScheduleSlot::query()
-            ->where('time', '<=', $currentTime)
-            ->orderBy('time', 'desc')
+        if ($this->shouldBeLocked($time)) {
+            return $this->lockedResponse($time);
+        }
+
+        $currentAvailableTimeSlot = ScheduleSlot::query()
+            ->where('time', '<=', $time->toDateString())
+            ->orderBy('time')
             ->first();
 
-        if (!$activeSlot) {
-            return $this->lockedResponse($now);
-        }
-
-        // Check if the user already submitted an entry for this specific slot today
-        $alreadyAnswered = Entry::query()
-            ->where('user_id', $request->user()->id)
-            ->whereDate('created_at', $now->toDateString())
-            ->where('metadata->slot_id', $activeSlot->id)
-            ->exists();
-
-        if ($alreadyAnswered) {
-            return $this->lockedResponse($now);
-        }
-
-        // Get IDs of prompts already used TODAY to ensure no repeats until reset
-        $usedPromptIds = Entry::query()
-            ->where('user_id', $request->user()->id)
-            ->whereDate('created_at', $now->toDateString())
+        $usedPromptIdsToday = $request->user()->entries()
+            ->whereDate('created_at', $time->toDateString())
             ->pluck('prompt_id');
 
-        // get the currently active prompt that's not in used prompt ids
-        // if exists, return active response
-        $activePrompt = Prompt::query()
-            ->where('ritual', 'interrupt')
-            ->whereNotIn('id', $usedPromptIds)
-            ->active()
-            ->first();
-
-        if ($activePrompt) {
+        $currentActivePrompt = $this->getCurrentActivePrompt($usedPromptIdsToday);
+        if ($currentActivePrompt) {
             return response()->json([
                 'status' => 'active',
-                'prompt' => $activePrompt,
-                'slot' => $activeSlot,
+                'prompt' => $currentActivePrompt,
+                'slot' => $currentAvailableTimeSlot,
             ]);
         }
 
-        $prompt = Prompt::query()
-            ->where('ritual', 'interrupt')
-            ->whereNotIn('id', $usedPromptIds)
-            ->inactive()
-            ->inRandomOrder()
-            ->first();
-
-        if (!$prompt) {
-            return response()->json(['error' => 'No prompts available'], 404);
+        $inactivePrompt = $this->getInactivePrompt($usedPromptIdsToday);
+        if (!$inactivePrompt) {
+            return response()->json(['error' => 'No prompts available'], Response::HTTP_NOT_FOUND);
         }
 
-        $prompt->update([
+        $inactivePrompt->update([
             'active' => true
         ]);
 
         return response()->json([
             'status' => 'active',
-            'prompt' => $prompt,
-            'slot' => $activeSlot,
+            'prompt' => $inactivePrompt,
+            'slot' => $currentAvailableTimeSlot,
         ]);
     }
 
-    protected function lockedResponse(CarbonInterface $now)
+    private function shouldBeLocked(CarbonInterface $time)
+    {
+        $currentAvailableTimeSlot = ScheduleSlot::query()
+            ->where('time', '<=', $time->format('H:i'))
+            ->orderByDesc('time')
+            ->first();
+
+        $alreadyAnswered = request()->user()->entries()
+            ->whereDate('created_at', $time->toDateString())
+            ->where('metadata->slot_id', $currentAvailableTimeSlot?->id)
+            ->exists();
+
+        return is_null($currentAvailableTimeSlot) || $alreadyAnswered;
+    }
+
+    private function getInactivePrompt(Collection $usedPromptIds)
+    {
+        return Prompt::query()
+            ->interrupt()
+            ->unused($usedPromptIds)
+            ->inactive()
+            ->inRandomOrder()
+            ->first();
+    }
+
+    private function getCurrentActivePrompt(Collection $usedPromptIds)
+    {
+        return Prompt::query()
+            ->interrupt()
+            ->unused($usedPromptIds)
+            ->active()
+            ->first();
+    }
+
+    private function lockedResponse(CarbonInterface $now)
     {
         $firstTimeSlot = ScheduleSlot::query()
             ->orderBy('time')
@@ -92,7 +101,7 @@ class InterruptController extends Controller
             ->first();
 
         if (is_null($nextTimeSlot)) {
-            $tomorrow = now()->addDay()->format('Y-m-d') . ' ' . $firstTimeSlot->time;
+            $tomorrow = $now->addDay()->format('Y-m-d') . ' ' . $firstTimeSlot->time;
             $nextTimeSlot = $tomorrow;
         } else {
             $nextTimeSlot = $now->format('Y-m-d') . ' ' . $nextTimeSlot->time;
