@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EntryRequest;
+use App\Models\Entry;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class EntryController extends Controller
 {
@@ -12,30 +13,29 @@ class EntryController extends Controller
     {
         $entries = $request->user()->entries()
             ->with('prompt')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->groupBy(function($entry) {
-                return $entry->created_at->startOfWeek()->format('Y-m-d');
-            });
+            ->orderByDesc('created_at')
+            ->get();
+
+        $weeklyEntries = $entries->groupBy(function ($entry) {
+            return $entry->created_at->startOfWeek()->format('Y-m-d');
+        });
 
         return Inertia::render('Journal', [
-            'entriesByWeek' => $entries
+            'entriesByWeek' => $weeklyEntries
         ]);
     }
 
-    public function store(Request $request)
+    public function store(EntryRequest $request)
     {
-        $validated = $request->validate([
-            'prompt_id' => 'required|exists:prompts,id',
-            'body' => 'required|string',
-            'slot_id' => 'required|exists:schedule_slots,id',
-        ]);
+        $validated = $request->validated();
 
-        $entry = $request->user()->entries()->create([
-            'prompt_id' => $validated['prompt_id'],
-            'body' => $validated['body'],
-            'metadata' => ['slot_id' => (int)$validated['slot_id']]
-        ]);
+        $entry = Entry::query()
+            ->where('user_id', $request->user()->id)
+            ->create([
+                'prompt_id' => $validated['prompt_id'],
+                'body' => $validated['body'],
+                'metadata' => ['slot_id' => (int)$validated['slot_id']]
+            ]);
 
         return response()->json($entry, 201);
     }
