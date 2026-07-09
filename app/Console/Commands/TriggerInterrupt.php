@@ -14,7 +14,7 @@ use Kreait\Laravel\Firebase\Facades\Firebase;
 
 class TriggerInterrupt extends Command
 {
-    protected $signature = 'app:trigger-interrupt';
+    protected $signature = 'interrupt:trigger';
     protected $description = 'Trigger an interrupt event if the current time matches a schedule slot';
 
     public function handle()
