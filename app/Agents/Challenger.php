@@ -16,16 +16,10 @@ class Challenger implements Agent, Conversational, HasTools
 {
     use Promptable;
 
-    /**
-     * Create a new Challenger agent instance.
-     */
     public function __construct(public ?User $user = null)
     {
     }
 
-    /**
-     * Get the instructions that the agent should follow.
-     */
     public function instructions(): Stringable|string
     {
         $instructions = <<<'PROMPT'
@@ -48,21 +42,11 @@ class Challenger implements Agent, Conversational, HasTools
         return $instructions;
     }
 
-    /**
-     * Get the list of messages comprising the conversation so far.
-     *
-     * @return Message[]
-     */
     public function messages(): iterable
     {
         return [];
     }
 
-    /**
-     * Get the tools available to the agent.
-     *
-     * @return Tool[]
-     */
     public function tools(): iterable
     {
         return [
