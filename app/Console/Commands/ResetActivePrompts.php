@@ -7,7 +7,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
-#[Signature('prompts:reset')]
+#[Signature('prompt:reset')]
 #[Description('Reset all active prompts')]
 class ResetActivePrompts extends Command
 {
