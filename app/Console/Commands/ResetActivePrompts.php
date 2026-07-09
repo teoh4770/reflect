@@ -13,10 +13,8 @@ class ResetActivePrompts extends Command
 {
     public function handle(): void
     {
-        Prompt::query()
-            ->where('active', true)
-            ->update([
-                'active' => false
-            ]);
+        Prompt::active()->update([
+            'active' => false
+        ]);
     }
 }

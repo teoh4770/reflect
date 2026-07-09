@@ -43,10 +43,9 @@ class InterruptController extends Controller
 
         // get the currently active prompt that's not in used prompt ids
         // if exists, return active response
-        $activePrompt = Prompt::query()
+        $activePrompt = Prompt::active()
             ->where('ritual', 'interrupt')
             ->whereNotIn('id', $usedPromptIds)
-            ->where('active', true)
             ->first();
 
         if ($activePrompt) {
@@ -57,9 +56,8 @@ class InterruptController extends Controller
             ]);
         }
 
-        $prompt = Prompt::query()
+        $prompt = Prompt::inactive()
             ->where('ritual', 'interrupt')
-            ->whereNot('active')
             ->whereNotIn('id', $usedPromptIds)
             ->inRandomOrder()
             ->first();
