@@ -27,8 +27,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $testUser = User::where('email', 'test@example.com')->first();
-        if ($testUser && !WeeklySummary::where('user_id', $testUser->id)->exists()) {
-            WeeklySummary::create([
+        if ($testUser && $testUser->weeklySummaries()->doesntExist()) {
+            WeeklySummary::query()->create([
                 'user_id' => $testUser->id,
                 'identity_snapshot' => 'I am a disciplined athlete.',
                 'week_start' => now()->startOfWeek()->subWeek()->toDateString(),
