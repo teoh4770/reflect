@@ -15,19 +15,16 @@ class InterruptController extends Controller
 {
     public function index(Request $request)
     {
-        $time = now();
+        $dateTime = now();
 
-        if ($this->shouldBeLocked($time)) {
-            return $this->lockedResponse($time);
+        if ($this->shouldBeLocked($dateTime->copy())) {
+            return $this->lockedResponse($dateTime->copy());
         }
 
-        $currentAvailableTimeSlot = ScheduleSlot::query()
-            ->where('time', '<=', $time->toDateString())
-            ->orderBy('time')
-            ->first();
+        $currentAvailableTimeSlot = $this->getCurrentSlot($dateTime->copy());
 
         $usedPromptIdsToday = $request->user()->entries()
-            ->whereDate('created_at', $time->toDateString())
+            ->whereDate('created_at', $dateTime->toDateString())
             ->pluck('prompt_id');
 
         $currentActivePrompt = $this->getCurrentActivePrompt($usedPromptIdsToday);
@@ -55,19 +52,24 @@ class InterruptController extends Controller
         ]);
     }
 
-    private function shouldBeLocked(CarbonInterface $time)
+    private function getCurrentSlot(CarbonInterface $time)
     {
-        $currentAvailableTimeSlot = ScheduleSlot::query()
+        return ScheduleSlot::query()
             ->where('time', '<=', $time->format('H:i'))
             ->orderByDesc('time')
             ->first();
+    }
+
+    private function shouldBeLocked(CarbonInterface $dateTime)
+    {
+        $currentAvailableTimeSlot = $this->getCurrentSlot($dateTime);
 
         $alreadyAnswered = request()->user()->entries()
-            ->whereDate('created_at', $time->toDateString())
+            ->whereDate('created_at', $dateTime->toDateString())
             ->where('metadata->slot_id', $currentAvailableTimeSlot?->id)
             ->exists();
 
-        return is_null($currentAvailableTimeSlot) || $alreadyAnswered;
+        return is_null($currentAvailableTimeSlot) || ($currentAvailableTimeSlot && $alreadyAnswered);
     }
 
     private function getInactivePrompt(Collection $usedPromptIds)
@@ -89,22 +91,22 @@ class InterruptController extends Controller
             ->first();
     }
 
-    private function lockedResponse(CarbonInterface $now)
+    private function lockedResponse(CarbonInterface $dateTime)
     {
         $firstTimeSlot = ScheduleSlot::query()
             ->orderBy('time')
             ->first();
 
         $nextTimeSlot = ScheduleSlot::query()
-            ->where('time', '>', $now->format('H:i:s'))
+            ->where('time', '>', $dateTime->format('H:i:s'))
             ->orderBy('time')
             ->first();
 
         if (is_null($nextTimeSlot)) {
-            $tomorrow = $now->addDay()->format('Y-m-d') . ' ' . $firstTimeSlot->time;
+            $tomorrow = $dateTime->addDay()->format('Y-m-d') . ' ' . $firstTimeSlot->time;
             $nextTimeSlot = $tomorrow;
         } else {
-            $nextTimeSlot = $now->format('Y-m-d') . ' ' . $nextTimeSlot->time;
+            $nextTimeSlot = $dateTime->format('Y-m-d') . ' ' . $nextTimeSlot->time;
         }
 
         return response()->json([

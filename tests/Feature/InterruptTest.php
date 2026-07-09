@@ -154,5 +154,38 @@ class InterruptTest extends TestCase
 
         $this->assertNotEquals($prompt1Id, $res2->json('prompt.id'));
     }
+
+    public function test_it_returns_the_most_recent_past_slot_as_current_slot()
+    {
+        // Slots seeded are 11:00, 13:30, 17:00
+        // Set time to after 13:30 but before 17:00
+        Carbon::setTestNow('2026-06-10 15:00:00');
+
+        $response = $this->getJson('/api/interrupt');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => 'active',
+                'slot' => ['time' => '13:30:00']
+            ]);
+            
+        // Also verify the full flow: filling it using the returned slot locks it
+        $slotId = $response->json('slot.id');
+        $promptId = $response->json('prompt.id');
+        
+        $this->postJson('/api/entries', [
+            'prompt_id' => $promptId,
+            'slot_id' => $slotId,
+            'body' => 'My response'
+        ]);
+
+        $responseAfterEntry = $this->getJson('/api/interrupt');
+
+        $responseAfterEntry->assertStatus(200)
+            ->assertJson([
+                'status' => 'locked',
+                'next_slot_at' => '2026-06-10 17:00:00'
+            ]);
+    }
 }
 
