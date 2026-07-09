@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Entry;
+use App\Models\Prompt;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -10,16 +12,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EntryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
-            'prompt_id' => \App\Models\Prompt::factory(),
+            'user_id' => User::factory(),
+            'prompt_id' => Prompt::factory(),
             'body' => $this->faker->paragraph(),
             'metadata' => []
         ];
