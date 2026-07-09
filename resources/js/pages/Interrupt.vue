@@ -166,7 +166,7 @@ const processFullAudio = async (blob: Blob) => {
     try {
         if (window.Echo) {
             window.Echo.channel(`transcription.${sessionId.value}`)
-                .listen('.TranscriptionChunkProcessed', (e: { text: string }) => {
+                .listen('.TranscriptionProcessed', (e: { text: string }) => {
                     if (e.text) {
                         const newText = e.text.trim();
                         entry.value = entry.value ? `${entry.value.trim()} ${newText}` : newText;
@@ -181,7 +181,7 @@ const processFullAudio = async (blob: Blob) => {
         console.error('Transcription failed:', error);
         errorMessage.value = error.response?.data?.reason || error.message || 'Transcription failed';
         isTranscribing.value = false;
-        
+
         setTimeout(() => {
             errorMessage.value = null;
         }, 5000);

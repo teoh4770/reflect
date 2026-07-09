@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TranscriptionRequest;
-use App\Jobs\ProcessTranscriptionChunk;
+use App\Jobs\ProcessTranscription;
 use App\Services\TranscriptionService;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +29,7 @@ class TranscriptionController extends Controller
         $path = $audio->storeAs(self::TEMP_AUDIO_DIRECTORY, $filename, self::DEFAULT_STORAGE_LOCATION);
 
         $audioFilePath = Storage::disk(self::DEFAULT_STORAGE_LOCATION)->path($path);
-        ProcessTranscriptionChunk::dispatch($audioFilePath, $request->session_id);
+        ProcessTranscription::dispatch($audioFilePath, $request->session_id);
 
         return response()->json(['status' => 'success']);
     }

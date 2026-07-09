@@ -8,7 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TranscriptionChunkProcessed implements ShouldBroadcastNow
+class TranscriptionProcessed implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -26,6 +26,6 @@ class TranscriptionChunkProcessed implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'TranscriptionChunkProcessed';
+        return 'TranscriptionProcessed';
     }
 }

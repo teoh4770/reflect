@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Jobs;
 
-use App\Events\TranscriptionChunkProcessed;
-use App\Jobs\ProcessTranscriptionChunk;
+use App\Events\TranscriptionProcessed;
+use App\Jobs\ProcessTranscription;
 use App\Services\TranscriptionService;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,9 +37,9 @@ class ProcessTranscriptionChunkTest extends TestCase
             })
         );
 
-        ProcessTranscriptionChunk::dispatch($audioPath, $sessionId);
+        ProcessTranscription::dispatch($audioPath, $sessionId);
 
-        Event::assertDispatched(TranscriptionChunkProcessed::class, function ($event) use ($sessionId) {
+        Event::assertDispatched(TranscriptionProcessed::class, function ($event) use ($sessionId) {
             return $event->text === 'Hello World' && $event->sessionId === $sessionId;
         });
 
@@ -67,13 +67,13 @@ class ProcessTranscriptionChunkTest extends TestCase
         );
 
         try {
-            ProcessTranscriptionChunk::dispatch($audioPath, $sessionId);
+            ProcessTranscription::dispatch($audioPath, $sessionId);
             $this->fail('Expected exception was not thrown');
         } catch (Exception $e) {
             $this->assertEquals('Transcription failed!', $e->getMessage());
         }
 
         $this->assertFalse(File::exists($audioPath));
-        Event::assertNotDispatched(TranscriptionChunkProcessed::class);
+        Event::assertNotDispatched(TranscriptionProcessed::class);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Events\TranscriptionChunkProcessed;
+use App\Events\TranscriptionProcessed;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -42,7 +42,7 @@ class TranscriptionControllerTest extends TestCase
         // 3. Assert
         $response->assertStatus(200);
 
-        Event::assertDispatched(TranscriptionChunkProcessed::class, function ($event) use ($sessionId) {
+        Event::assertDispatched(TranscriptionProcessed::class, function ($event) use ($sessionId) {
             return $event->text === 'Transcribed chunk text.' && $event->sessionId === $sessionId;
         });
     }

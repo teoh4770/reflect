@@ -2,34 +2,31 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-
-use App\Events\TranscriptionChunkProcessed;
+use App\Events\TranscriptionProcessed;
 use App\Services\TranscriptionService;
+use Laravel\Ai\Exceptions\FailoverableException;
 
-class ProcessTranscriptionChunk implements ShouldQueue
+class ProcessTranscription implements ShouldQueue
 {
     use Queueable;
 
     public int $timeout = 20;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public string $audioPath,
         public string $sessionId
-    ) {}
+    )
+    {
+    }
 
-    /**
-     * Execute the job.
-     */
     public function handle(TranscriptionService $transcriptionService): void
     {
         try {
-            $text = $transcriptionService->transcribe($this->audioPath);
-            broadcast(new TranscriptionChunkProcessed($text, $this->sessionId));
+            $transcriptionResult = $transcriptionService->transcribe($this->audioPath);
+            broadcast(new TranscriptionProcessed($transcriptionResult, $this->sessionId));
         } finally {
             if (file_exists($this->audioPath)) {
                 unlink($this->audioPath);
