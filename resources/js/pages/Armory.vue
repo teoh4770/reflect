@@ -18,7 +18,6 @@ const summaries = ref<Summary[]>([]);
 const isSunday = ref(false);
 const alreadyFinished = ref(false);
 const loading = ref(true);
-const generating = ref(false);
 const selectedSummary = ref<Summary | null>(null);
 
 const fetchSummaries = async () => {
@@ -36,21 +35,6 @@ const fetchSummaries = async () => {
         console.error('Failed to fetch summaries', error);
     } finally {
         loading.value = false;
-    }
-};
-
-const finishWeek = async () => {
-    generating.value = true;
-
-    try {
-        const response = await axios.post('/api/summary');
-        summaries.value.unshift(response.data);
-        selectedSummary.value = response.data;
-        alreadyFinished.value = true;
-    } catch (error: any) {
-        alert(error.response?.data?.error || 'Failed to generate summary');
-    } finally {
-        generating.value = false;
     }
 };
 
@@ -73,18 +57,6 @@ const formatDate = (dateStr: string) => {
                     <h1 class="text-3xl md:text-4xl font-bold tracking-widest uppercase text-center md:text-left">The Armory</h1>
                     <p class="text-neutral-500 mt-2 italic text-center md:text-left text-sm md:text-base">Your collection of past weekly summaries.</p>
                 </div>
-
-                <button
-                    @click="finishWeek"
-                    :disabled="!isSunday || generating || alreadyFinished"
-                    class="w-full md:w-auto px-8 py-3 border-2 transition-all font-bold uppercase tracking-widest text-sm disabled:opacity-20 disabled:cursor-not-allowed"
-                    :class="[isSunday && !alreadyFinished ? 'border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-neutral-800 text-neutral-600']"
-                >
-                    <span v-if="generating">Analyzing your week...</span>
-                    <span v-else-if="alreadyFinished">Week Finished</span>
-                    <span v-else-if="isSunday">Finish the Week</span>
-                    <span v-else>Locked until Sunday</span>
-                </button>
             </header>
 
             <div v-if="loading" class="text-center py-20 opacity-30 animate-pulse">
@@ -158,6 +130,7 @@ const formatDate = (dateStr: string) => {
 <style scoped>
 .line-clamp-2 {
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;

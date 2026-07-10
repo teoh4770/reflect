@@ -1,14 +1,13 @@
 <?php
 
-use App\Console\Commands\ResetActivePrompts;
+use App\Console\Commands\GenerateSummary;
+use App\Console\Commands\ResetActivePrompt;
 use App\Console\Commands\TriggerInterrupt;
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
-
-Schedule::command(ResetActivePrompts::class)->daily();
 Schedule::command(TriggerInterrupt::class)->everyMinute();
+
+Schedule::command(ResetActivePrompt::class)->daily();
+
+Schedule::command(GenerateSummary::class)->weeklyOn(Carbon::SUNDAY);

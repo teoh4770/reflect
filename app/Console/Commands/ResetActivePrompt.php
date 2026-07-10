@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 #[Signature('prompt:reset')]
 #[Description('Reset all active prompts')]
-class ResetActivePrompts extends Command
+class ResetActivePrompt extends Command
 {
     public function handle(): void
     {

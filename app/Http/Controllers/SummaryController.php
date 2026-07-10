@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Agents\Challenger;
-use App\Models\WeeklySummary;
+use App\Actions\CreateWeeklySummaryAction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Laravel\Ai\Responses\AgentResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class SummaryController extends Controller
@@ -29,7 +27,7 @@ class SummaryController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, CreateWeeklySummaryAction $createWeeklySummaryAction)
     {
         $today = now();
         $isSunday = $today->copy()->dayOfWeek === Carbon::SUNDAY;
@@ -50,25 +48,8 @@ class SummaryController extends Controller
             ], Response::HTTP_CONFLICT);
         }
 
-        $weekStart = $today->copy()->startOfWeek()->toDateString();
-        $weekEnd = $today->copy()->endOfWeek()->toDateString();
-
-        $generatedWeeklySummary = $this->generateWeeklySummary($weekStart, $weekEnd);
-
-        $summary = WeeklySummary::query()->create([
-            'user_id' => $request->user()->id,
-            'week_start' => $weekStart,
-            'week_end' => $weekEnd,
-            'identity_snapshot' => $request->user()->identity_statement,
-            'content' => (string)$generatedWeeklySummary
-        ]);
+        $summary = $createWeeklySummaryAction->execute($today->copy(), $request->user());
 
         return response()->json($summary, Response::HTTP_CREATED);
-    }
-
-    private function generateWeeklySummary(string $weekStart, string $weekEnd): AgentResponse
-    {
-        $agent = Challenger::make(request()->user());
-        return $agent->prompt("Summarize my week from $weekStart to $weekEnd. Identify contradictions with my Identity Statement.");
     }
 }
