@@ -53,12 +53,14 @@ class SummaryController extends Controller
         $weekStart = $today->copy()->startOfWeek()->toDateString();
         $weekEnd = $today->copy()->endOfWeek()->toDateString();
 
+        $generatedWeeklySummary = $this->generateWeeklySummary($weekStart, $weekEnd);
+
         $summary = WeeklySummary::query()->create([
             'user_id' => $request->user()->id,
             'week_start' => $weekStart,
             'week_end' => $weekEnd,
             'identity_snapshot' => $request->user()->identity_statement,
-            'content' => (string)$this->generateWeeklySummary($weekStart, $weekEnd),
+            'content' => (string)$generatedWeeklySummary
         ]);
 
         return response()->json($summary, Response::HTTP_CREATED);
