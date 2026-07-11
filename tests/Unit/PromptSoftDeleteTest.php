@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use App\Models\Entry;
 use App\Models\Prompt;
 use App\Models\User;
-use Database\Seeders\PromptSeeder;
+use Database\Seeders\InterruptSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -38,18 +38,18 @@ class PromptSoftDeleteTest extends TestCase
     public function test_prompt_seeder_does_not_duplicate_soft_deleted_prompts(): void
     {
         // Run the seeder to create prompts
-        $this->seed(PromptSeeder::class);
+        $this->seed(InterruptSeeder::class);
 
         // Get the first prompt and soft delete it
         $prompt = Prompt::where('ritual', 'interrupt')->first();
         $promptBody = $prompt->body;
         $promptId = $prompt->id;
-        
+
         $prompt->delete();
         $this->assertSoftDeleted($prompt);
 
         // Run the seeder again
-        $this->seed(PromptSeeder::class);
+        $this->seed(InterruptSeeder::class);
 
         // Check that a new prompt was not created with the same body
         $count = Prompt::withTrashed()->where('body', $promptBody)->count();

@@ -5,6 +5,8 @@ namespace Tests\Feature\Actions;
 use App\Actions\CreateWeeklySummaryAction;
 use App\Agents\Challenger;
 use App\Models\User;
+use App\Models\Prompt;
+use App\Models\Entry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -17,6 +19,13 @@ class CreateWeeklySummaryActionTest extends TestCase
     {
         $user = User::factory()->create([
             'identity_statement' => 'I am a tester.',
+        ]);
+
+        $prompt = Prompt::factory()->create(['ritual' => 'pain', 'body' => 'What hurts?']);
+        Entry::factory()->create([
+            'user_id' => $user->id,
+            'prompt_id' => $prompt->id,
+            'body' => 'I am in pain.'
         ]);
 
         $today = Carbon::parse('2023-10-15'); // A Sunday
@@ -37,7 +46,10 @@ class CreateWeeklySummaryActionTest extends TestCase
         ]);
 
         Challenger::assertPrompted(function ($prompt) use ($today) {
-            return str_contains($prompt->prompt, 'Summarize my week from ' . $today->copy()->startOfWeek()->toDateString() . ' to ' . $today->copy()->endOfWeek()->toDateString());
+            $hasDates = str_contains($prompt->prompt, 'Summarize my week from ' . $today->copy()->startOfWeek()->toDateString() . ' to ' . $today->copy()->endOfWeek()->toDateString());
+            $hasVision = str_contains($prompt->prompt, 'What hurts?') && str_contains($prompt->prompt, 'I am in pain.');
+            
+            return $hasDates && $hasVision;
         });
     }
 }

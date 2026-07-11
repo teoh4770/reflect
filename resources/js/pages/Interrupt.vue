@@ -11,6 +11,10 @@ const activeSlot = ref({id: null, time: ''});
 const nextSlotAt = ref<string | null>(null);
 const status = ref<'loading' | 'active' | 'locked'>('loading');
 const errorMessage = ref<string | null>(null);
+const visionCompleted = ref(true);
+const visionAnsweredCount = ref(0);
+const visionTotalCount = ref(0);
+const showVisionPopup = ref(false);
 
 const entry = ref('');
 const isRecording = ref(false);
@@ -36,9 +40,20 @@ const fetchState = async () => {
             prompt.value = data.prompt;
             activeSlot.value = data.slot;
             status.value = 'active';
+            showVisionPopup.value = false;
         } else {
             nextSlotAt.value = data.next_slot_at;
             status.value = 'locked';
+            
+            if (data.vision_completed === false) {
+                visionCompleted.value = false;
+                visionAnsweredCount.value = data.vision_answered_count;
+                visionTotalCount.value = data.vision_total_count;
+                showVisionPopup.value = true;
+            } else {
+                showVisionPopup.value = false;
+            }
+            
             startCountdown();
         }
     } catch (error) {
@@ -249,21 +264,47 @@ const submitEntry = async () => {
 
         <!-- LOCKED STATE -->
         <div v-else-if="status === 'locked'"
-             class="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in duration-1000">
-            <div class="text-center space-y-2">
+             class="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in duration-1000 relative w-full h-full justify-center">
+            
+            <div class="text-center space-y-2 transition-opacity duration-500" :class="{ 'opacity-30': showVisionPopup }">
                 <div class="text-zinc-600 text-[10px] uppercase tracking-[0.4em]">Ritual Closed</div>
                 <h1 class="text-5xl md:text-6xl font-bold tabular-nums tracking-tighter text-zinc-300">
                     {{ countdown }}
                 </h1>
             </div>
 
-            <div class="max-w-xs text-center">
+            <div class="max-w-xs text-center transition-opacity duration-500" :class="{ 'opacity-30': showVisionPopup }">
                 <p class="text-zinc-500 text-xs leading-relaxed italic">
                     Take a breath. Return when the next reflection window opens.
                 </p>
             </div>
 
-            <div class="h-px w-12 bg-zinc-800"></div>
+            <div class="h-px w-12 bg-zinc-800 transition-opacity duration-500" :class="{ 'opacity-30': showVisionPopup }"></div>
+
+            <!-- Vision Nudge Popup -->
+            <div v-if="showVisionPopup" class="absolute inset-0 flex items-center justify-center p-4 z-50">
+                <div class="bg-zinc-900 border border-zinc-700 w-full max-w-sm flex flex-col gap-4 text-center p-8 shadow-2xl animate-in fade-in zoom-in duration-300">
+                    <h2 class="text-xl font-bold text-zinc-100">Design Your Future</h2>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        You've completed {{ visionAnsweredCount }} out of {{ visionTotalCount }} Vision questions. Taking time to clarify your anti-vision helps fuel your daily reflections.
+                    </p>
+                    <p class="text-zinc-300 text-sm">Can you answer more today?</p>
+                    <div class="flex flex-col gap-2 mt-4">
+                        <button 
+                            @click="$inertia.visit('/visions')" 
+                            class="bg-zinc-200 text-black w-full py-3 font-bold text-sm tracking-widest uppercase hover:bg-white transition-colors"
+                        >
+                            YES, LET'S DO IT
+                        </button>
+                        <button 
+                            @click="showVisionPopup = false" 
+                            class="bg-transparent text-zinc-500 w-full py-3 text-xs uppercase tracking-widest hover:text-zinc-300 transition-colors"
+                        >
+                            NOT RIGHT NOW
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ACTIVE STATE -->

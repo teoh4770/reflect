@@ -108,10 +108,20 @@ class InterruptController extends Controller
         } else {
             $nextTimeSlot = $dateTime->format('Y-m-d') . ' ' . $nextTimeSlot->time;
         }
+        
+        $visionPromptsCount = Prompt::query()->whereIn('ritual', ['pain', 'anti-vision', 'vision'])->count();
+        $visionAnsweredCount = request()->user()->entries()
+            ->whereHas('prompt', function ($q) {
+                $q->whereIn('ritual', ['pain', 'anti-vision', 'vision']);
+            })
+            ->count();
 
         return response()->json([
             'status' => 'locked',
             'next_slot_at' => $nextTimeSlot,
+            'vision_completed' => $visionPromptsCount > 0 && $visionAnsweredCount >= $visionPromptsCount,
+            'vision_answered_count' => $visionAnsweredCount,
+            'vision_total_count' => $visionPromptsCount,
         ]);
     }
 }

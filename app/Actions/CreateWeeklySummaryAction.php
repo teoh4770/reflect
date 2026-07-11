@@ -28,7 +28,22 @@ class CreateWeeklySummaryAction
 
     private function generateWeeklySummary(string $weekStart, string $weekEnd, User $user): AgentResponse
     {
+        $visionEntries = $user->entries()
+            ->with('prompt')
+            ->whereHas('prompt', function ($query) {
+                $query->whereIn('ritual', ['pain', 'anti-vision', 'vision']);
+            })
+            ->get();
+
+        $visionContext = "";
+        if ($visionEntries->isNotEmpty()) {
+            $visionContext = "\n\nMy visions (Pain, Anti-Vision, Vision):\n";
+            foreach ($visionEntries as $entry) {
+                $visionContext .= "- Question: {$entry->prompt->body}\n  Answer: $entry->body\n";
+            }
+        }
+
         $agent = Challenger::make($user);
-        return $agent->prompt("Summarize my week from $weekStart to $weekEnd. Identify contradictions with my Identity Statement.");
+        return $agent->prompt("Summarize my week from $weekStart to $weekEnd. Identify contradictions with my Identity Statement.{$visionContext}");
     }
 }

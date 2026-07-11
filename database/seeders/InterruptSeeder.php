@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Models\Prompt;
 use Illuminate\Database\Seeder;
 
-class PromptSeeder extends Seeder
+class InterruptSeeder extends Seeder
 {
     /**
      * Run the database seeds.

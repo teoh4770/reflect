@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
-#[Fillable(['ritual', 'body', 'active'])]
+#[Fillable(['ritual', 'body', 'tooltip', 'active'])]
 class Prompt extends Model
 {
     use HasFactory;

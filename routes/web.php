@@ -5,6 +5,7 @@ use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\InterruptController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\TranscriptionController;
+use App\Http\Controllers\VisionController;
 use App\Models\ScheduleSlot;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,6 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::inertia('/armory', 'Armory')->name('armory');
 
     Route::get('/journal', [EntryController::class, 'index'])->name('journal');
+
+    Route::get('/visions', [VisionController::class, 'index'])->name('vision.index');
+    Route::post('/visions', [VisionController::class, 'store'])->name('vision.store');
+    Route::post('/visions/{id}', [VisionController::class, 'update'])->name('vision.update');
 
     Route::get('/settings', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Settings', [

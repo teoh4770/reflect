@@ -22,7 +22,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
-            PromptSeeder::class,
+            InterruptSeeder::class,
+            VisionSeeder::class,
             ScheduleSlotSeeder::class,
         ]);
 
