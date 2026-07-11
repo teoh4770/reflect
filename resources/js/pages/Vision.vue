@@ -107,6 +107,11 @@ const progressPercent = computed(() => totalPrompts.value > 0 ? (totalCompleted.
 
 const activeTab = ref<'pain' | 'anti-vision' | 'vision'>('pain');
 
+const activeTooltip = ref<number | null>(null);
+const toggleTooltip = (id: number) => {
+    activeTooltip.value = activeTooltip.value === id ? null : id;
+};
+
 onMounted(() => {
     if (isPainCompleted.value && !isAntiVisionCompleted.value) {
         activeTab.value = 'anti-vision';
@@ -134,7 +139,7 @@ const activePrompts = computed(() => {
     <Head title="Vision"/>
     <Navigation/>
 
-    <div class="min-h-screen bg-[#0a0a0a] text-[#EDEDEC] pt-8 md:pt-24 pb-28 md:pb-6 px-4 md:px-6 font-sans">
+    <div class="min-h-screen bg-[#0a0a0a] text-[#EDEDEC] pt-8 md:pt-24 pb-28 md:pb-6 px-4 md:px-6 font-sans overflow-x-hidden">
         <div class="max-w-2xl mx-auto">
             <h1 class="text-xl md:text-2xl font-bold mb-6 md:mb-8 uppercase tracking-widest text-zinc-300 font-mono">
                 Design Your Future
@@ -152,7 +157,7 @@ const activePrompts = computed(() => {
                 </div>
             </div>
 
-            <div class="flex gap-6 border-b border-zinc-800 pb-2 mb-6">
+            <div class="flex flex-wrap gap-4 md:gap-6 border-b border-zinc-800 pb-2 mb-6">
                 <button
                     @click="activeTab = 'pain'"
                     :class="['flex items-center gap-2 pb-2 -mb-2 border-b-2 transition-colors', activeTab === 'pain' ? 'border-zinc-200 text-zinc-200 font-bold' : 'border-transparent text-zinc-500 hover:text-zinc-300']"
@@ -190,11 +195,15 @@ const activePrompts = computed(() => {
 
                             <div v-if="prompt.tooltip" class="relative group inline-flex items-center self-start mt-1">
                                 <div
-                                    class="w-4 h-4 rounded-full border border-zinc-500 flex items-center justify-center text-[10px] text-zinc-500 cursor-help font-bold">
+                                    @click="toggleTooltip(prompt.id)"
+                                    class="w-4 h-4 rounded-full border border-zinc-500 flex items-center justify-center text-[10px] text-zinc-500 cursor-pointer md:cursor-help font-bold">
                                     ?
                                 </div>
                                 <div
-                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-zinc-800 text-sm text-zinc-300 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none">
+                                    :class="[
+                                        'absolute bottom-full right-0 md:left-1/2 md:-translate-x-1/2 mb-2 w-[calc(100vw-3rem)] max-w-xs md:w-64 p-3 bg-zinc-800 text-sm text-zinc-300 rounded shadow-lg transition-all z-10 pointer-events-none',
+                                        activeTooltip === prompt.id ? 'opacity-100 visible' : 'opacity-0 invisible md:group-hover:opacity-100 md:group-hover:visible'
+                                    ]">
                                     {{ prompt.tooltip }}
                                 </div>
                             </div>
