@@ -109,11 +109,9 @@ class InterruptController extends Controller
             $nextTimeSlot = $dateTime->format('Y-m-d') . ' ' . $nextTimeSlot->time;
         }
 
-        $visionPromptsCount = Prompt::query()->whereIn('ritual', ['pain', 'anti-vision', 'vision'])->count();
+        $visionPromptsCount = Prompt::query()->motivationalDrivers()->count();
         $visionAnsweredCount = request()->user()->entries()
-            ->whereHas('prompt', function ($q) {
-                $q->whereIn('ritual', ['pain', 'anti-vision', 'vision']);
-            })
+            ->motivationalDrivers()
             ->count();
 
         $visionCompleted = $visionPromptsCount === 0 || $visionAnsweredCount >= $visionPromptsCount;

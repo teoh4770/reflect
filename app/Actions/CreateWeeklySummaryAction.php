@@ -30,9 +30,7 @@ class CreateWeeklySummaryAction
     {
         $visionEntries = $user->entries()
             ->with('prompt')
-            ->whereHas('prompt', function ($query) {
-                $query->whereIn('ritual', ['pain', 'anti-vision', 'vision']);
-            })
+            ->motivationalDrivers()
             ->get();
 
         $visionContext = "";

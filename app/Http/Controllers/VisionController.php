@@ -11,7 +11,7 @@ class VisionController extends Controller
     public function index(Request $request)
     {
         $visionPrompts = Prompt::query()
-            ->whereIn('ritual', ['pain', 'anti-vision', 'vision'])
+            ->motivationalDrivers()
             ->get();
 
         $entries = $request->user()->entries()

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Ritual;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,6 +37,12 @@ class Prompt extends Model
     protected function interrupt(Builder $query): void
     {
         $query->where('ritual', 'interrupt');
+    }
+
+    #[Scope]
+    protected function motivationalDrivers(Builder $query): void
+    {
+        $query->whereIn('ritual', [Ritual::PAIN->value, Ritual::ANTI_VISION->value, Ritual::VISION->value]);
     }
 
     #[Scope]
