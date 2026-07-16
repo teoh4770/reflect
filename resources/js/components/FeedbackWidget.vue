@@ -46,32 +46,28 @@ const submitFeedback = async () => {
 </script>
 
 <template>
-    <!-- floating trigger button -->
+    <!-- trigger button -->
     <button
         @click="isOpen = true"
-        class="fixed bottom-6 right-6 z-40 bg-blue-600 text-white rounded-full p-4 shadow-lg hover:bg-blue-700 transition-colors focus:outline-none"
+        class="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-md font-mono text-xs uppercase tracking-wider transition-colors"
         aria-label="Submit Feedback"
     >
-        <!-- Help Icon (?) -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0
-  11-18 0 9 9 0 0118 0z"/>
-        </svg>
+        Provide Feedback
     </button>
 
-    <!-- Modal dialog   -->
+    <!-- Modal dialog -->
     <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4"
         @click.self="isOpen = false"
     >
         <!-- Modal Content -->
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+        <div class="bg-[#161615] border border-[#3E3E3A] rounded-lg shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
 
             <!-- Modal Header -->
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-800">Send Feedback</h2>
-                <button @click="isOpen = false" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+            <div class="p-4 border-b border-[#3E3E3A] flex justify-between items-center bg-[#0a0a0a]/50">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-zinc-300 font-mono">Send Feedback</h2>
+                <button @click="isOpen = false" class="text-zinc-500 hover:text-zinc-300 focus:outline-none transition-colors">
                     <!-- Close (X) Icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10
@@ -81,38 +77,37 @@ const submitFeedback = async () => {
             </div>
 
             <!-- Modal Body (Form) -->
-            <form @submit.prevent="submitFeedback" class="p-4">
-                <div class="mb-4">
+            <form @submit.prevent="submitFeedback" class="p-6">
+                <div class="mb-6">
                     <label for="feedback-body" class="sr-only">Your Feedback</label>
                     <textarea
                         id="feedback-body"
                         v-model="body"
-                        rows="4"
-                        class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 resize-none outline-none"
+                        class="w-full bg-[#0a0a0a] border border-[#3E3E3A] rounded-md p-4 text-white focus:outline-none focus:border-zinc-500 min-h-[140px] resize-y font-mono text-sm placeholder-zinc-600 transition-colors"
                         placeholder="What's on your mind? Found a bug? Have an idea?"
                         required
                     ></textarea>
                     <!-- Display validation errors for body if they exist -->
-                    <div v-if="errors.body" class="text-red-500 text-sm mt-1">
+                    <div v-if="errors.body" class="text-red-500 font-mono text-xs mt-2 uppercase tracking-wide">
                         {{ errors.body[0] }}
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end gap-2">
+                <div class="flex justify-end items-center gap-4">
                     <button
                         type="button"
                         @click="isOpen = false"
-                        class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                        class="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 hover:text-zinc-300 font-mono transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         :disabled="isSubmitting"
-                        class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none disabled:opacity-50"
+                        class="bg-white text-black hover:bg-zinc-200 px-6 py-2 rounded-md font-mono text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
                     >
-                        {{ isSubmitting ? 'Sending...' : 'Send' }}
+                        {{ isSubmitting ? 'Sending...' : 'Commit' }}
                     </button>
                 </div>
             </form>
