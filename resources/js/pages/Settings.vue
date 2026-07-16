@@ -5,6 +5,7 @@ import {ref} from 'vue';
 import AuthController from "@/actions/App/Http/Controllers/AuthController";
 import FeedbackWidget from '@/components/FeedbackWidget.vue';
 import Navigation from '@/components/Navigation.vue';
+import TranscribeTextarea from '@/components/TranscribeTextarea.vue';
 
 const props = defineProps<{
     identity_statement: string | null;
@@ -69,21 +70,16 @@ const testNotification = async () => {
                 </p>
 
                 <form @submit.prevent="save">
-                    <textarea
-                        v-model="statement"
-                        class="w-full bg-[#0a0a0a] border border-[#3E3E3A] rounded-md p-4 text-white focus:outline-none focus:border-zinc-500 min-h-[120px] resize-y mb-4 font-mono text-sm"
-                        placeholder="I am a disciplined individual who..."
-                    ></textarea>
+                    <div class="mb-4">
+                        <TranscribeTextarea
+                            v-model="statement"
+                            placeholder="I am a disciplined individual who..."
+                            @submit="save"
+                        />
+                    </div>
 
                     <div class="flex justify-end items-center gap-4">
                         <span v-if="saved" class="text-green-500 text-sm font-mono transition-opacity">Saved successfully</span>
-                        <button
-                            type="submit"
-                            :disabled="saving"
-                            class="bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-md font-mono text-xs uppercase tracking-wider transition-colors disabled:opacity-50"
-                        >
-                            {{ saving ? 'Saving...' : 'Save Statement' }}
-                        </button>
                     </div>
                 </form>
             </div>

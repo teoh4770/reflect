@@ -2,6 +2,7 @@
 import {router, Head} from '@inertiajs/vue3';
 import {ref, computed, onMounted} from 'vue';
 import Navigation from "@/components/Navigation.vue";
+import TranscribeTextarea from "@/components/TranscribeTextarea.vue";
 
 interface Prompt {
     id: number;
@@ -209,11 +210,11 @@ const activePrompts = computed(() => {
                             </div>
                         </div>
 
-                        <textarea
+                        <TranscribeTextarea
                             v-model="forms[prompt.id]"
-                            class="w-full h-24 bg-transparent border border-zinc-700 rounded-md p-3 text-zinc-200 focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all resize-none"
                             placeholder="Your answer..."
-                        ></textarea>
+                            @submit="props.entries[prompt.id] ? updateEntry(prompt) : storeEntry(prompt)"
+                        />
 
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
@@ -222,22 +223,6 @@ const activePrompts = computed(() => {
                                         warnings[prompt.id]
                                     }}</small>
                             </div>
-                            <button
-                                v-if="!props.entries[prompt.id]"
-                                @click="storeEntry(prompt)"
-                                :disabled="saving[prompt.id]"
-                                class="bg-zinc-200 hover:bg-zinc-100 text-zinc-900 px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-                            >
-                                {{ saving[prompt.id] ? 'Saving...' : 'Save' }}
-                            </button>
-                            <button
-                                v-else
-                                @click="updateEntry(prompt)"
-                                :disabled="saving[prompt.id]"
-                                class="bg-zinc-200 hover:bg-zinc-100 text-zinc-900 px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
-                            >
-                                {{ saving[prompt.id] ? 'Updating...' : 'Update' }}
-                            </button>
                         </div>
                     </div>
                 </template>
