@@ -5,7 +5,6 @@ import axios from 'axios';
 import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { onMounted } from 'vue';
-import FeedbackWidget from "@/components/FeedbackWidget.vue";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

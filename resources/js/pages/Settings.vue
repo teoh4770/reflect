@@ -3,8 +3,8 @@ import {Head, usePage} from '@inertiajs/vue3';
 import axios from 'axios';
 import {ref} from 'vue';
 import AuthController from "@/actions/App/Http/Controllers/AuthController";
-import Navigation from '@/components/Navigation.vue';
 import FeedbackWidget from '@/components/FeedbackWidget.vue';
+import Navigation from '@/components/Navigation.vue';
 
 const props = defineProps<{
     identity_statement: string | null;
