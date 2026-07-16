@@ -11,7 +11,11 @@ class FeedbackController extends Controller
 {
     public function store(FeedbackRequest $request)
     {
-        $createdFeedback = Feedback::query()->create($request->validated());
+        $data = array_merge($request->validated(), [
+            'user_id' => auth()->id()
+        ]);
+
+        $createdFeedback =  Feedback::query()->create($data);
         $feedback = new FeedbackResource($createdFeedback);
 
         return response()->json($feedback, Response::HTTP_CREATED);

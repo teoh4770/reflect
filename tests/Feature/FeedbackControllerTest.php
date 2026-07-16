@@ -41,7 +41,7 @@ class FeedbackControllerTest extends TestCase
         ]);
     }
 
-    public function test_feedback_requires_body_and_valid_user_id()
+    public function test_feedback_requires_body()
     {
         $user = User::factory()->create();
 
@@ -49,15 +49,6 @@ class FeedbackControllerTest extends TestCase
             ->postJson(route('api.feedback.store'), []);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonValidationErrors(['body', 'user_id']);
-
-        $response = $this->actingAs($user)
-            ->postJson(route('api.feedback.store'), [
-                'user_id' => 99999,
-                'body' => 'Valid body',
-            ]);
-
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonValidationErrors(['user_id']);
+            ->assertJsonValidationErrors(['body']);
     }
 }
