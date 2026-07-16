@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue';
 import axios from 'axios';
+import { ref, watch, onUnmounted } from 'vue';
 
 const props = withDefaults(defineProps<{
     modelValue: string;
@@ -45,6 +45,7 @@ watch(localValue, (newVal) => {
 
 onUnmounted(() => {
     stopRecording();
+
     if (typeof window !== 'undefined' && window.Echo) {
         window.Echo.leaveChannel(`transcription.${sessionId.value}`);
     }
@@ -157,6 +158,7 @@ const showError = (msg: string) => {
 const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
+
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 

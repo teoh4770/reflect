@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {Head} from '@inertiajs/vue3';
-import axios from 'axios';
 import {ref, onMounted, onUnmounted} from 'vue';
 import EntryController from "@/actions/App/Http/Controllers/EntryController";
 import InterruptController from "@/actions/App/Http/Controllers/InterruptController";
@@ -11,7 +10,6 @@ const prompt = ref({id: null, body: 'Loading...'});
 const activeSlot = ref({id: null, time: ''});
 const nextSlotAt = ref<string | null>(null);
 const status = ref<'loading' | 'active' | 'locked'>('loading');
-const errorMessage = ref<string | null>(null);
 const visionCompleted = ref(true);
 const visionAnsweredCount = ref(0);
 const visionTotalCount = ref(0);
@@ -97,15 +95,6 @@ onUnmounted(() => {
         clearInterval(countdownInterval);
     }
 });
-
-
-
-const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
 
 const confirmEntry = () => {
     if (!entry.value.trim() || transcribeTextareaRef.value?.isRecording || transcribeTextareaRef.value?.isTranscribing) {
