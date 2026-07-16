@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EntryController;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\IdentityController;
 use App\Http\Controllers\InterruptController;
 use App\Http\Controllers\SummaryController;
@@ -92,5 +93,7 @@ Route::middleware('auth')->group(function () {
                 return response()->json(['error' => $e->getMessage()], HttpResponse::HTTP_INTERNAL_SERVER_ERROR);
             }
         })->name('test-notification');
+
+        Route::post('/feedbacks', [FeedbackController::class, 'store'])->name('feedback.store');
     });
 });
