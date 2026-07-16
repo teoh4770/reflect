@@ -9,7 +9,7 @@ class FeedbackRequest extends FormRequest
 	public function rules(): array
 	{
 		return [
-			'user_id' => ['required', 'exists:users'],
+			'user_id' => ['required', 'exists:users,id'],
 			'body' => ['required'],
 			'is_public' => ['boolean'],
 		];
