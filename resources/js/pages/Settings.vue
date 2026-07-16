@@ -4,6 +4,7 @@ import axios from 'axios';
 import {ref} from 'vue';
 import AuthController from "@/actions/App/Http/Controllers/AuthController";
 import Navigation from '@/components/Navigation.vue';
+import FeedbackWidget from '@/components/FeedbackWidget.vue';
 
 const props = defineProps<{
     identity_statement: string | null;
@@ -103,6 +104,14 @@ const testNotification = async () => {
                     </span>
                 </div>
                 <p v-else class="text-sm text-zinc-500 italic">No schedule slots configured.</p>
+            </div>
+
+            <div class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-4 md:p-6 shadow-sm mt-6">
+                <h2 class="text-lg font-medium mb-2">Help & Feedback</h2>
+                <p class="text-sm text-zinc-400 mb-4">
+                    Encountered a bug or have an idea to improve Reflect? Let us know.
+                </p>
+                <FeedbackWidget />
             </div>
 
             <div v-if="user?.email === 'ck@gmail.com'" class="bg-[#161615] rounded-lg border border-[#3E3E3A] p-4 md:p-6 shadow-sm mt-6">
